@@ -1,0 +1,9 @@
+*.[ao]
+*.gz
+*.orig
+*.rej
+obj
+.gdbinit
+.#*.*
+*~
+authlogd
