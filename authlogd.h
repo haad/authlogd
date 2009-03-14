@@ -26,60 +26,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef _AUTHLOGD_H_
+#define _AUTHLOGD_H_
 
 
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
-#include <err.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
-#include <prop/proplib.h>
-
-static void usage(void);
-
-int
-main(int argc, char **argv)
-{
-	
-  	while ((ch = getopt(argc, argv, "c:h")) != -1 )
-		switch(ch){
-
-		case 'h':
-			usage();
-			/* NOTREACHED */
-		break;
-		case 'c':
-		{
-			printf("Internalizing proplib authenticated application file %s\n", (char *)optarg);
-		}
-		break;
-		default:
-			usage();
-			/* NOTREACHED */
-
-		}
-	argc-=optind;
-	argv+=optind;
-	
-  usage();
-
-  return EXIT_SUCCESS;
-}
-
-static void 
-usage(void)
-{
-
-  printf("Authlogd daemon accept these switches\n");
-
-  exit(EXIT_FAILURE);
-}
+#endif
