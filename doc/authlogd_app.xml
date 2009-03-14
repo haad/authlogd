@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+   <!-- 
+      config dictionary entry is guarded by sign, hash will be generated from 
+      externalized version of config dictionary.
+     -->
+  <key>config</key>
+  <dict>
+    <key>version</key> <!--File version-->
+    <number>1</number>    
+    <key>hash_type</key> <!--Digital hash type supported types sha1, sha2.-->
+    <string>sha1</string>
+    <key>applications</key> <!--Array of application entries-->
+    <array>
+      <dict>
+	<key>path</key> <!--Path to application-->
+	<string>/usr/sbin/ntpd</string>
+	<key>hash</key> <!--Digital hash generated with $hash_type algorithm-->
+	<string>6d233d8fcea4a329f340ab7b0c4836823bccb994</string>
+      </dict>
+    </array>
+  </dict>
+  <key>sign_block</key>
+  <dict>
+    <key>sign</key>
+    <string></string> <!--base64 encoded sign for config dictionary -->
+    <key>certificate</key>
+    <string></string> <!--base64 encoded certificate which was used to sign config dictionary -->
+  </dict>
+</dict>
+</plist>

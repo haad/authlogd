@@ -29,8 +29,17 @@
 #ifndef _AUTHLOGD_H_
 #define _AUTHLOGD_H_
 
+#ifdef AUTHLOGD_DEBUG
+#define DPRINTF(arg) printf arg
+#else
+#define DPRINTF(arg)
+#endif
 
+#define AUTH_LOG_PATH /var/run/authlog
 
+typedef struct ald_conf {
+	uint32_t verbose; 
+} ald_conf_t; 
 
 
 #endif
