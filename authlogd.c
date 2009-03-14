@@ -44,6 +44,8 @@
 
 #include <prop/proplib.h>
 
+#include "authlogd.h"
+
 static void usage(void);
 
 int
