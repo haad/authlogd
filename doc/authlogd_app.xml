@@ -6,28 +6,55 @@
       config dictionary entry is guarded by sign, hash will be generated from 
       externalized version of config dictionary.
      -->
-  <key>config</key>
-  <dict>
-    <key>version</key> <!--File version-->
-    <number>1</number>    
-    <key>hash_type</key> <!--Digital hash type supported types sha1, sha2.-->
-    <string>sha1</string>
-    <key>applications</key> <!--Array of application entries-->
-    <array>
-      <dict>
-	<key>path</key> <!--Path to application-->
-	<string>/usr/sbin/ntpd</string>
-	<key>hash</key> <!--Digital hash generated with $hash_type algorithm-->
-	<string>6d233d8fcea4a329f340ab7b0c4836823bccb994</string>
-      </dict>
-    </array>
+   <key>config</key>
+   <dict>
+     <key>conf_version</key> <!--File version-->
+     <number>1</number>
+     <!----------------------------------------> 
+     <key>authmod</key> <!-- List of used auth modules application must support all of them -->
+     <array>
+       <dict> <!-- hash_path authentication module configuration -->
+	 <!-- application hash from configuration file must be equal to hash generated from /proc/$pid/exe -->
+	 <key>authmod_name</key>
+	 <string>auth_hash</string>
+	 <key>authmod_config</key>
+	 <dict> <!-- This is auth module config part, it is module independent -->
+	   <key>hash_type</key> <!--Digital hash type supported types sha1, sha2.-->
+	   <string>sha1</string>
+	 </dict>
+       </dict>
+       <dict>
+	 <!-- app egid must be equal to gid from group_id -->
+	 <key>authmod_name</key>
+	 <string>auth_gid</string>
+	 <dict>
+	   <key>group_id</key>
+	   <string>1523</string>  <!-- default egid number -->
+	 </dict>
+       </dict>
+     </array>
+     <!---------------------------------------->    
+     <key>app</key> <!--Array of application entries-->
+     <array>
+       <dict>
+	 <key>app_path</key> <!--Path to application-->
+	 <string>/usr/sbin/ntpd</string>
+	 <dict>
+	   <key>auth_hash</key> <!-- Auth module name -->
+	   <string>6d233d8fcea4a329f340ab7b0c4836823bccb994</string> <!--Digital hash generated with $hash_type algorithm-->
+	   <key>auth_gid</key> <!-- Auth module name -->
+	   <string>1682</string> <!-- Auth group id for this app -->
+	 </dict>
+       </dict>
+     </array>
   </dict>
-  <key>sign_block</key>
-  <dict>
-    <key>sign</key>
-    <string></string> <!--base64 encoded sign for config dictionary -->
-    <key>certificate</key>
-    <string></string> <!--base64 encoded certificate which was used to sign config dictionary -->
-  </dict>
+   <!----------------------------------------> 
+   <key>sign</key> <!--Crypto sign block guarding configuration part of file-->
+   <dict>
+     <key>sign_block</key>
+     <string></string> <!--base64 encoded sign for config dictionary -->
+     <key>sign_cert</key>
+     <string></string> <!--base64 encoded certificate which was used to sign config dictionary -->
+   </dict>
 </dict>
 </plist>
