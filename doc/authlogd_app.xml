@@ -2,34 +2,32 @@
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-   <!-- 
-      config dictionary entry is guarded by sign, hash will be generated from 
-      externalized version of config dictionary.
-     -->
+   <!-- Config dictionary entry is guarded by sign, hash will be generated from 
+	externalized version of config dictionary.-->
    <key>config</key>
    <dict>
      <key>conf_version</key> <!--File version-->
      <number>1</number>
      <!----------------------------------------> 
-     <key>authmod</key> <!-- List of used auth modules application must support all of them -->
+     <key>authmod</key> <!--List of used auth modules application must support all of them-->
      <array>
-       <dict> <!-- hash_path authentication module configuration -->
-	 <!-- application hash from configuration file must be equal to hash generated from /proc/$pid/exe -->
+       <dict><!--Hash_path authentication module configuration-->
+	 <!--Application hash from configuration file must be equal to hash generated from /proc/$pid/exe-->
 	 <key>authmod_name</key>
 	 <string>auth_hash</string>
 	 <key>authmod_config</key>
-	 <dict> <!-- This is auth module config part, it is module independent -->
+	 <dict> <!--This is auth module config part, it is module independent-->
 	   <key>hash_type</key> <!--Digital hash type supported types sha1, sha2.-->
 	   <string>sha1</string>
 	 </dict>
        </dict>
        <dict>
-	 <!-- app egid must be equal to gid from group_id -->
+	 <!--App egid must be equal to gid from group_id-->
 	 <key>authmod_name</key>
 	 <string>auth_gid</string>
 	 <dict>
 	   <key>group_id</key>
-	   <string>1523</string>  <!-- default egid number -->
+	   <string>1523</string>  <!--Default egid number-->
 	 </dict>
        </dict>
      </array>
@@ -40,10 +38,20 @@
 	 <key>app_path</key> <!--Path to application-->
 	 <string>/usr/sbin/ntpd</string>
 	 <dict>
-	   <key>auth_hash</key> <!-- Auth module name -->
+	   <key>auth_hash</key> <!--Auth module name-->
 	   <string>6d233d8fcea4a329f340ab7b0c4836823bccb994</string> <!--Digital hash generated with $hash_type algorithm-->
-	   <key>auth_gid</key> <!-- Auth module name -->
-	   <string>1682</string> <!-- Auth group id for this app -->
+	   <key>auth_gid</key> <!--Auth module name-->
+	   <string>1682</string> <!--Auth group id for this app-->
+	 </dict>
+       </dict>
+       <dict>
+	 <key>app_path</key> <!--Path to application-->
+	 <string>/usr/sbin/sshd</string>
+	 <dict>
+	   <key>auth_hash</key> <!--Auth module name-->
+	   <string>268aea7afdb99c39332184fa5fa5affa5f5cc60e</string> <!--Digital hash generated with $hash_type algorithm-->
+	   <key>auth_gid</key> <!--Auth module name-->
+	   <string>1683</string> <!--Auth group id for this app-->
 	 </dict>
        </dict>
      </array>
