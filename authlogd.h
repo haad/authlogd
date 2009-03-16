@@ -29,17 +29,59 @@
 #ifndef _AUTHLOGD_H_
 #define _AUTHLOGD_H_
 
+#include <sys/queue.h>
+
+#include <assert.h>
+
+#include <prop/proplib.h>
+
 #ifdef AUTHLOGD_DEBUG
 #define DPRINTF(arg) printf arg
 #else
 #define DPRINTF(arg)
+#define NDEBUG
 #endif
 
 #define AUTH_LOG_PATH /var/run/authlog
+#define AUTHLOG_VERSION 1
 
-typedef struct ald_conf {
-	uint32_t verbose; 
-} ald_conf_t; 
+typedef struct auth_msg {
+	char    msg_path[MAXPATHLEN];  /* Path to application */
+	uid_t   msg_uid;                 /* real user id */
+	uid_t   msg_euid;                /* effective user id */
+	gid_t   msg_gid;                 /* real group id */
+	gid_t   msg_egid;                /* effective group id */
+	int     msg_ngroups;             /* number of supplemental groups */
+	gid_t   msg_groups[1];           /* variable length */
+	pid_t   msg_pid;                  /* process id */
+} auth_msg_t;
 
+#define MAX_NAME_LEN 32
+/* Structure defining authentication module */
+typedef struct auth_mod {
+	char name[MAX_NAME_LEN];
+  	int (*init)(void **);
+	int (*conf)(prop_dictionary_t, void *);
+	void (*destroy)(void **);
+	int (*auth)(auth_msg_t *);
+	void *auth_mod_config;
+	SLIST_ENTRY(auth_mod) next_mod;
+} auth_mod_t;
+
+/* auth_mod.c */
+void auth_mod_init(void);
+int  auth_mod_check(char *);
+
+/* auth_mod_hash.c */
+int auth_mod_hash_init(void **);
+int auth_mod_hash_conf(prop_dictionary_t, void *);
+void auth_mod_hash_destroy(void **);
+int auth_mod_hash_auth(auth_msg_t *);
+
+/* auth_mod_gid.c */
+int auth_mod_gid_init(void **);
+int auth_mod_gid_conf(prop_dictionary_t, void *);
+void auth_mod_gid_destroy(void **);
+int auth_mod_gid_auth(auth_msg_t *);
 
 #endif
