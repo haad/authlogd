@@ -84,4 +84,7 @@ int auth_mod_gid_conf(prop_dictionary_t, void *);
 void auth_mod_gid_destroy(void **);
 int auth_mod_gid_auth(auth_msg_t *);
 
+/* config.c */
+int parse_config(prop_dictionary_t);
+
 #endif

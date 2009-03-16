@@ -27,7 +27,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -42,39 +41,74 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <prop/proplib.h>
-
 #include "authlogd.h"
 
 static void usage(void);
 
+/*! 
+ * Authenticated Logging Deamon 
+ * Descr:
+ * This is deamon used for authentication of logging aplications.
+ * Authenticated messages are marked with special created SD element which contains
+ * digitaly signed hash of application PID.
+ *
+ * Several Auth. modules are supported and more can be easily added
+ * there are auth_mod_hash and auth_mod_gid modules which uses application
+ * binary hash and efective GroupID of running application to authenticate it.
+ *
+ * Authentication info is loaded to module with configuration file which must be in
+ * proplib internalize form. Example of self signed configuration file can be found 
+ * in doc/authlogd_app.xml.
+ *
+ */
+
+
 int
 main(int argc, char **argv)
 {
+	int ch;
+	int conf_cert;
+	prop_dictionary_t conf_buf;
 	
-  	while ((ch = getopt(argc, argv, "c:h")) != -1 )
+  	while ((ch = getopt(argc, argv, "P:p:C:c:h")) != -1 )
 		switch(ch){
-
+			
 		case 'h':
 			usage();
 			/* NOTREACHED */
+			break;
+		case 'C':
+		{
+			/* Public key used to verify config file. */
+			conf_cert = 1;
+			/** @bug Load Cert from file and pass it to config
+			   file parsing routines */
+		}
 		break;
 		case 'c':
 		{
-			printf("Internalizing proplib authenticated application file %s\n", (char *)optarg);
+			DPRINTF(("Internalizing proplib authenticated application file %s\n", (char *)optarg));
+			if ((conf_buf = prop_dictionary_internalize_from_file((char *)optarg)) == NULL)
+				err(EXIT_FAILURE, "Cannot Internalize config file to buffer\n");
 		}
 		break;
 		default:
 			usage();
 			/* NOTREACHED */
-
 		}
 	argc-=optind;
 	argv+=optind;
-	
-  usage();
 
-  return EXIT_SUCCESS;
+	if (!conf_cert)
+		return EXIT_FAILURE;
+
+	/** Initialize precompiled authentication modules. */
+	auth_mod_init();
+
+	/** Parse configuration file and init auth modules info. */
+	parse_config(conf_buf);
+
+	return EXIT_SUCCESS;
 }
 
 static void 
