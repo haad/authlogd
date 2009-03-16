@@ -7,7 +7,7 @@
    <key>config</key>
    <dict>
      <key>conf_version</key> <!--File version-->
-     <number>1</number>
+     <integer>1</integer>
      <!----------------------------------------> 
      <key>authmod</key> <!--List of used auth modules application must support all of them-->
      <array>
@@ -25,6 +25,7 @@
 	 <!--App egid must be equal to gid from group_id-->
 	 <key>authmod_name</key>
 	 <string>auth_gid</string>
+	 <key>authmod_config</key>
 	 <dict>
 	   <key>group_id</key>
 	   <string>1523</string>  <!--Default egid number-->
@@ -37,6 +38,7 @@
        <dict>
 	 <key>app_path</key> <!--Path to application-->
 	 <string>/usr/sbin/ntpd</string>
+	 <key>appmod_config</key>
 	 <dict>
 	   <key>auth_hash</key> <!--Auth module name-->
 	   <string>6d233d8fcea4a329f340ab7b0c4836823bccb994</string> <!--Digital hash generated with $hash_type algorithm-->
@@ -47,6 +49,7 @@
        <dict>
 	 <key>app_path</key> <!--Path to application-->
 	 <string>/usr/sbin/sshd</string>
+	 <key>appmod_config</key>
 	 <dict>
 	   <key>auth_hash</key> <!--Auth module name-->
 	   <string>268aea7afdb99c39332184fa5fa5affa5f5cc60e</string> <!--Digital hash generated with $hash_type algorithm-->
