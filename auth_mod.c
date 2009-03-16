@@ -10,10 +10,14 @@
 
 #include "authlogd.h"
 
+/** Authentication module list */
 static SLIST_HEAD(auth_mods, auth_mod) auth_mod_list;
 
 static auth_mod_t * auth_mod_alloc(void);
 
+/*!
+ * Allocate authentication module entry for next usage.
+ */
 static auth_mod_t *
 auth_mod_alloc(void)
 {
@@ -27,6 +31,9 @@ auth_mod_alloc(void)
 	return mod;
 }
 
+/*!
+ * Add auth_mod entry to list of available authentication modules
+ */
 static void
 auth_mod_add(auth_mod_t *auth_mod)
 {
@@ -34,6 +41,10 @@ auth_mod_add(auth_mod_t *auth_mod)
 	SLIST_INSERT_HEAD(&auth_mod_list, auth_mod, next_mod);
 }
 
+
+/*!
+ * Debug routine used for dumping authmod list entries.
+ */
 static void
 auth_mod_dumplist(void)
 {
@@ -50,6 +61,10 @@ auth_mod_dumplist(void)
 	return;
 }
 
+/*!
+ * Check if auth_mod with given name exists in a list.
+ * @param auth_module_name
+ */
 int
 auth_mod_check(char *auth_mod_name)
 {
@@ -63,6 +78,9 @@ auth_mod_check(char *auth_mod_name)
 	return 1;
 }
 
+/*!
+ * Initialize auth_module subsystem and setup default auth modules.
+ */
 void
 auth_mod_init(void)
 {
