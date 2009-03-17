@@ -68,7 +68,7 @@ auth_mod_gid_init(prop_dictionary_t gid_dict, void **auth_mod_config)
  * @param pointer to auth_mod_configuration from auth_mod::auth_mod_config.
  */
 int
-auth_mod_gid_conf(prop_object_t conf_obj, void *auth_mod_config)
+auth_mod_gid_conf(prop_object_t conf_obj, const char *path, void *auth_mod_config)
 {
 
 }
