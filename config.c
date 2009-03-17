@@ -176,7 +176,7 @@ parse_app_sect(prop_array_t app_array)
 			
 			obj = prop_dictionary_get(auth_dict, CF_CONF_APP_DATA_DATA);
 			
-			auth_mod->conf(obj, auth_mod->config);
+			auth_mod->conf(obj, path, auth_mod->config);
 		
 		}
 	}

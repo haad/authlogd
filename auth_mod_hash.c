@@ -18,21 +18,25 @@
 typedef struct hash_t {
 	const char *hashname; /* algorithm name */
 	char* (*filefunc)(const char *, char *); /* function */
+	uint16_t digest_len;
 } hash_t;
 
 /* define the possible hash algorithms */
 static hash_t hashes[] = {
-	{ "SHA1", SHA1File },
-	{ "SHA256", SHA256_File },
-	{ "SHA384", SHA384_File },
-	{ "SHA512", SHA512_File },
+	{ "SHA1", SHA1File, SHA1_DIGEST_STRING_LENGTH },
+	{ "SHA256", SHA256_File, SHA256_DIGEST_STRING_LENGTH },
+	{ "SHA384", SHA384_File, SHA384_DIGEST_STRING_LENGTH },
+	{ "SHA512", SHA512_File, SHA512_DIGEST_STRING_LENGTH },
 	{ NULL, NULL },
 };
 
+static TAILQ_HEAD(app_head, hash_app_entry) hash_apps_list;
+
 /** Structure describing every application entry */
 typedef struct hash_app_entry {
-	
-	
+	const char path[MAXPATHLEN];
+	const char *hash; /* use longest digest string length here */
+	TAILQ_ENTRY(hash_app_entry) next_app;
 } hash_app_entry_t;
 
 /** Strucutre storing default settings for hash auth module */
@@ -74,6 +78,8 @@ auth_mod_hash_init(prop_dictionary_t hash_dict, void **hash_config)
 			conf->mod_hash = hash;
 
 	*hash_config = conf;
+
+	TAILQ_INIT(&hash_apps_list);
 	
 	return 0;
 }

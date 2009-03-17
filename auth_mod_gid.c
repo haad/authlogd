@@ -10,11 +10,15 @@
 
 #include "authlogd.h"
 
+
 /** Structure describing every application entry */
 typedef struct gid_app_entry {
-	
-	
+	const char path[MAXPATHLEN];
+	gid_t app_gid;
+	TAILQ_ENTRY(gid_app_entry) next_app;
 } gid_app_entry_t;
+
+static TAILQ_HEAD(gid_head, gid_app_entry) gid_apps_list;
 
 /** Strucutre storing default settings for gid auth module */
 typedef struct mod_gid_conf {
