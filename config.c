@@ -28,6 +28,13 @@
 #define CF_SIGN_CERT    "sign_cert"
 
 /* Third level key names in config dictionary */
+#define CF_CONF_AUTH_NAME   "authmod_name"
+#define CF_CONF_AUTH_CONFIG "authmod_config"
+
+#define CF_CONF_APP_PATH    "app_path"
+#define CF_CONF_APP_CONF    "appmod_config"
+
+/* Fourth Level key names in config dictionary */
 
 static int verify_config_sign(prop_dictionary_t, prop_dictionary_t);
 static void parse_authmod_sect(prop_array_t);
@@ -102,7 +109,28 @@ verify_config_sign(prop_dictionary_t config, prop_dictionary_t sign)
 static void
 parse_authmod_sect(prop_array_t authmod_array)
 {
+	prop_object_iterator_t iter;
+	prop_dictionary_t authmod_dict, authmod_config_dict;
+	auth_mod_t *auth_mod;
+	const char *name;
+	char *buf;
 
+	iter = prop_array_iterator(authmod_array);
+	
+	while((authmod_dict = prop_object_iterator_next(iter)) != NULL){
+
+		prop_dictionary_get_cstring_nocopy(authmod_dict, CF_CONF_AUTH_NAME, &name);
+
+		DPRINTF(("auth module: %s configuration found in config file\n", name));
+
+		if ((auth_mod = auth_mod_search(name)) == NULL)
+			warn("Configuration file is wrong I found auth module in it which is not compiled in\n");
+
+		authmod_config_dict = prop_dictionary_get(authmod_dict, CF_CONF_AUTH_CONFIG);
+
+		auth_mod->init(authmod_config_dict, auth_mod->config);
+	}
+	
 	return;
 }
 
