@@ -42,6 +42,19 @@
 #define NDEBUG
 #endif
 
+#ifdef AUTHLOGD_DEBUG
+#define DUMP_DICT(dict, buf) do {				\
+		buf = prop_dictionary_externalize(dict);	\
+		printf("%s\n", buf);				\
+		free(buf);					\
+	} while(/*CONSTCOND*/0)
+#define DUMP_ARRAY(array, buf) do {				\
+		buf = prop_array_externalize(array);		\
+		printf("%s\n", buf);				\
+		free(buf);					\
+	} while(/*CONSTCOND*/0)
+#endif
+
 #define AUTH_LOG_PATH /var/run/authlog
 #define AUTHLOG_VERSION 1
 
@@ -60,26 +73,28 @@ typedef struct auth_msg {
 /* Structure defining authentication module */
 typedef struct auth_mod {
 	char name[MAX_NAME_LEN];
-  	int (*init)(void **);
+	/* Initialize auth_mod defaults from dictionary */
+  	int (*init)(prop_dictionary_t, void **);
+	/* Configure application details for auth_mod */
 	int (*conf)(prop_dictionary_t, void *);
 	void (*destroy)(void **);
 	int (*auth)(auth_msg_t *);
-	void *auth_mod_config;
+	void *config;
 	SLIST_ENTRY(auth_mod) next_mod;
 } auth_mod_t;
 
 /* auth_mod.c */
 void auth_mod_init(void);
-int  auth_mod_check(char *);
+auth_mod_t*  auth_mod_search(const char *);
 
 /* auth_mod_hash.c */
-int auth_mod_hash_init(void **);
+int auth_mod_hash_init(prop_dictionary_t, void **);
 int auth_mod_hash_conf(prop_dictionary_t, void *);
 void auth_mod_hash_destroy(void **);
 int auth_mod_hash_auth(auth_msg_t *);
 
 /* auth_mod_gid.c */
-int auth_mod_gid_init(void **);
+int auth_mod_gid_init(prop_dictionary_t, void **);
 int auth_mod_gid_conf(prop_dictionary_t, void *);
 void auth_mod_gid_destroy(void **);
 int auth_mod_gid_auth(auth_msg_t *);

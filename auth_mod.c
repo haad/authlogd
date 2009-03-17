@@ -62,20 +62,19 @@ auth_mod_dumplist(void)
 }
 
 /*!
- * Check if auth_mod with given name exists in a list.
+ * Search for auth_mod with given name in a list and return auth_mod_t if found.
  * @param auth_module_name
  */
-int
-auth_mod_check(char *auth_mod_name)
+auth_mod_t *
+auth_mod_search(const char *auth_mod_name)
 {
 	auth_mod_t *mod;
 
 	SLIST_FOREACH(mod, &auth_mod_list, next_mod)
 		if ((strncmp(mod->name, auth_mod_name, MAX_NAME_LEN)) == 0)
-			return 0;
+			return mod;
 	
-	
-	return 1;
+	return NULL;
 }
 
 /*!
