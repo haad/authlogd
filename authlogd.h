@@ -76,7 +76,7 @@ typedef struct auth_mod {
 	/* Initialize auth_mod defaults from dictionary */
   	int (*init)(prop_dictionary_t, void **);
 	/* Configure application details for auth_mod */
-	int (*conf)(prop_dictionary_t, void *);
+	int (*conf)(prop_object_t, void *);
 	void (*destroy)(void **);
 	int (*auth)(auth_msg_t *);
 	void *config;
@@ -89,13 +89,13 @@ auth_mod_t*  auth_mod_search(const char *);
 
 /* auth_mod_hash.c */
 int auth_mod_hash_init(prop_dictionary_t, void **);
-int auth_mod_hash_conf(prop_dictionary_t, void *);
+int auth_mod_hash_conf(prop_object_t, void *);
 void auth_mod_hash_destroy(void **);
 int auth_mod_hash_auth(auth_msg_t *);
 
 /* auth_mod_gid.c */
 int auth_mod_gid_init(prop_dictionary_t, void **);
-int auth_mod_gid_conf(prop_dictionary_t, void *);
+int auth_mod_gid_conf(prop_object_t, void *);
 void auth_mod_gid_destroy(void **);
 int auth_mod_gid_auth(auth_msg_t *);
 

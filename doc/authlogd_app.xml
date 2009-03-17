@@ -39,23 +39,39 @@
 	 <key>app_path</key> <!--Path to application-->
 	 <string>/usr/sbin/ntpd</string>
 	 <key>appmod_config</key>
-	 <dict>
-	   <key>auth_hash</key> <!--Auth module name-->
-	   <string>6d233d8fcea4a329f340ab7b0c4836823bccb994</string> <!--Digital hash generated with $hash_type algorithm-->
-	   <key>auth_gid</key> <!--Auth module name-->
-	   <string>1682</string> <!--Auth group id for this app-->
-	 </dict>
+	 <array>
+	   <dict>
+	     <key>auth_mod</key>
+	     <string>auth_hash</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <string>6d233d8fcea4a329f340ab7b0c4836823bccb994</string> <!--Digital hash generated with $hash_type algorithm-->
+	   </dict>
+	   <dict>
+	     <key>auth_mod</key>	     
+	     <string>auth_gid</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <string>1682</string> <!--Auth group id for this app-->
+	   </dict>
+	 </array>
        </dict>
        <dict>
 	 <key>app_path</key> <!--Path to application-->
 	 <string>/usr/sbin/sshd</string>
 	 <key>appmod_config</key>
-	 <dict>
-	   <key>auth_hash</key> <!--Auth module name-->
-	   <string>268aea7afdb99c39332184fa5fa5affa5f5cc60e</string> <!--Digital hash generated with $hash_type algorithm-->
-	   <key>auth_gid</key> <!--Auth module name-->
-	   <string>1683</string> <!--Auth group id for this app-->
-	 </dict>
+	 <array>
+	   <dict>
+	     <key>auth_mod</key>
+	     <string>auth_hash</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <string>268aea7afdb99c39332184fa5fa5affa5f5cc60e</string> <!--Digital hash generated with $hash_type algorithm-->
+	   </dict>
+	   <dict>
+	     <key>auth_mod</key>
+	     <string>auth_gid</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <string>1683</string> <!--Auth group id for this app-->
+	   </dict>
+	 </array>
        </dict>
      </array>
   </dict>

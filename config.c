@@ -32,9 +32,12 @@
 #define CF_CONF_AUTH_CONFIG "authmod_config"
 
 #define CF_CONF_APP_PATH    "app_path"
-#define CF_CONF_APP_CONF    "appmod_config"
+#define CF_CONF_APP_DATA    "appmod_config"
 
 /* Fourth Level key names in config dictionary */
+
+#define CF_CONF_APP_DATA_NAME "auth_mod"
+#define CF_CONF_APP_DATA_DATA "auth_mod_data"
 
 static int verify_config_sign(prop_dictionary_t, prop_dictionary_t);
 static void parse_authmod_sect(prop_array_t);
@@ -142,6 +145,40 @@ parse_authmod_sect(prop_array_t authmod_array)
 static void
 parse_app_sect(prop_array_t app_array)
 {
+	prop_object_iterator_t iter, app_iter;
+	prop_dictionary_t app_dict, auth_dict;
+	prop_array_t app_conf_array;
+	prop_object_t obj;
+	auth_mod_t *auth_mod;
+	const char *path;
+	const char *buf;
+	const char *name;
+	
+	iter = prop_array_iterator(app_array);
+	
+	while((app_dict = prop_object_iterator_next(iter)) != NULL){
 
+		prop_dictionary_get_cstring_nocopy(app_dict, CF_CONF_APP_PATH, &path);
+
+		DPRINTF(("app path: %s configuration found in config file\n", path));
+
+		/* Get dictionary with auth module auth data */
+		app_conf_array = prop_dictionary_get(app_dict, CF_CONF_APP_DATA);
+
+		app_iter = prop_array_iterator(app_conf_array);
+
+		while((auth_dict = prop_object_iterator_next(app_iter)) != NULL) {
+
+			prop_dictionary_get_cstring_nocopy(auth_dict, CF_CONF_APP_DATA_NAME, &name);
+						
+			if ((auth_mod = auth_mod_search(name)) == NULL)
+				warn("Configuration file is wrong I found auth module in it which is not compiled in\n");
+			
+			obj = prop_dictionary_get(auth_dict, CF_CONF_APP_DATA_DATA);
+			
+			auth_mod->conf(obj, auth_mod->config);
+		
+		}
+	}
 	return;
 }

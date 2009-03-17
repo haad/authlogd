@@ -87,7 +87,7 @@ auth_mod_hash_init(prop_dictionary_t hash_dict, void **hash_config)
  * @param pointer to auth_mod_configuration from auth_mod::auth_mod_config.
  */
 int
-auth_mod_hash_conf(prop_dictionary_t conf_dict, void *auth_mod_config)
+auth_mod_hash_conf(prop_object_t conf_obj, void *auth_mod_config)
 {
 
 	return 0;
