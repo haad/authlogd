@@ -18,10 +18,13 @@ typedef struct gid_app_entry {
 
 /** Strucutre storing default settings for gid auth module */
 typedef struct mod_gid_conf {
-
-	
-	
+	gid_t default_gid;
 } mod_gid_conf_t;
+
+/* First level entries in hash module configuration dictionary */
+#define AUTHMOD_GID_ID "group_id"
+
+#define DEFAULT_GROUP_ID 0
 
 /*!
  * Initialize auth_module defaults. This routine is being run from
@@ -31,9 +34,28 @@ typedef struct mod_gid_conf {
  * @param double pointer to auth_mod_configuration from auth_mod::auth_mod_config.
  */
 int
-auth_mod_gid_init(prop_dictionary_t auth_mod_dict, void **auth_mod_config)
+auth_mod_gid_init(prop_dictionary_t gid_dict, void **auth_mod_config)
 {
+	mod_gid_conf_t *conf;
+	gid_t gid;
+	
+	DPRINTF(("Auth gid mod init function called.\n"));
 
+	if (!prop_dictionary_get_uint32(gid_dict, AUTHMOD_GID_ID, (uint32_t *)&gid)) {
+		warn("Default group id was not found in gid module configuration dict default is %d\n",
+		    DEFAULT_GROUP_ID);
+		gid = DEFAULT_GROUP_ID;
+	}
+	if ((conf = malloc(sizeof(mod_gid_conf_t))) == NULL)
+	    err(EXIT_FAILURE, "Cannot allocate memmory for hash mod configuration structure\n");
+
+	memset(conf, 0, sizeof(mod_gid_conf_t));
+
+	conf->default_gid = gid;
+
+	*auth_mod_config = conf;
+
+	return 0;
 }
 
 /*!

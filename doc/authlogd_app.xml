@@ -28,7 +28,7 @@
 	 <key>authmod_config</key>
 	 <dict>
 	   <key>group_id</key>
-	   <string>1523</string>  <!--Default egid number-->
+	   <integer>1523</integer>  <!--Default egid number-->
 	 </dict>
        </dict>
      </array>

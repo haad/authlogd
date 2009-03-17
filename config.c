@@ -128,7 +128,7 @@ parse_authmod_sect(prop_array_t authmod_array)
 
 		authmod_config_dict = prop_dictionary_get(authmod_dict, CF_CONF_AUTH_CONFIG);
 
-		auth_mod->init(authmod_config_dict, auth_mod->config);
+		auth_mod->init(authmod_config_dict, &auth_mod->config);
 	}
 	
 	return;
