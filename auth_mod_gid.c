@@ -13,7 +13,7 @@
 
 /** Structure describing every application entry */
 typedef struct gid_app_entry {
-	const char path[MAXPATHLEN];
+	char app_path[MAXPATHLEN];
 	gid_t app_gid;
 	TAILQ_ENTRY(gid_app_entry) next_app;
 } gid_app_entry_t;
@@ -59,6 +59,8 @@ auth_mod_gid_init(prop_dictionary_t gid_dict, void **auth_mod_config)
 
 	*auth_mod_config = conf;
 
+	TAILQ_INIT(&gid_apps_list);
+	
 	return 0;
 }
 
@@ -69,12 +71,42 @@ auth_mod_gid_init(prop_dictionary_t gid_dict, void **auth_mod_config)
  * This routine is being run from config.c::parse_app_sect function.
  *
  * @param app_auth_mod configuration dictionary
+ * @param path to authenticated application
  * @param pointer to auth_mod_configuration from auth_mod::auth_mod_config.
  */
 int
-auth_mod_gid_conf(prop_object_t conf_obj, const char *path, void *auth_mod_config)
+auth_mod_gid_conf(prop_object_t conf_obj, const char *path, void *config)
 {
+	gid_app_entry_t *app;
+	mod_gid_conf_t *conf;
+	gid_t gid;
 
+	assert(config != NULL);
+	
+	conf = config;
+	
+	DPRINTF(("GID auth mdoule configuration routine called\n"));
+
+	if (prop_object_type(conf_obj) != PROP_TYPE_NUMBER) {
+		warn("Gid module config element for application %s require <integer> tag\n", path);
+		DPRINTF(("Using default value %d\n", conf->default_gid));
+		gid = conf->default_gid;
+	}
+
+	gid = prop_number_integer_value(conf_obj);
+	
+	if ((app = malloc(sizeof(gid_app_entry_t))) == NULL)
+		err(EXIT_FAILURE, "Cannot Allocate memory %s\n", __func__);
+	
+	memset(app, 0, sizeof(gid_app_entry_t));
+
+	app->app_gid = gid;
+
+	strncpy(app->app_path, path, MAXPATHLEN);
+
+	TAILQ_INSERT_HEAD(&gid_apps_list, app, next_app);
+	
+	return 0;
 }
 
 /*!
