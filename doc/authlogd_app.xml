@@ -50,7 +50,7 @@
 	     <key>auth_mod</key>	     
 	     <string>auth_gid</string> <!--Auth module name-->
 	     <key>auth_mod_data</key>
-	     <string>1682</string> <!--Auth group id for this app-->
+	     <integer>1682</integer> <!--Auth group id for this app-->
 	   </dict>
 	 </array>
        </dict>
@@ -69,7 +69,7 @@
 	     <key>auth_mod</key>
 	     <string>auth_gid</string> <!--Auth module name-->
 	     <key>auth_mod_data</key>
-	     <string>1683</string> <!--Auth group id for this app-->
+	     <integer>1683</integer> <!--Auth group id for this app-->
 	   </dict>
 	 </array>
        </dict>
