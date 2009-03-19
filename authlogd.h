@@ -55,19 +55,19 @@
 	} while(/*CONSTCOND*/0)
 #endif
 
-#define AUTH_LOG_PATH /var/run/authlog
+#define AUTH_LOG_PATH "/var/run/authlog"
 #define AUTHLOG_VERSION 1
 
 typedef struct auth_msg {
-	char    msg_path[MAXPATHLEN];  /* Path to application */
-	uid_t   msg_uid;                 /* real user id */
-	uid_t   msg_euid;                /* effective user id */
-	gid_t   msg_gid;                 /* real group id */
-	gid_t   msg_egid;                /* effective group id */
-	int     msg_ngroups;             /* number of supplemental groups */
-	gid_t   msg_groups[1];           /* variable length */
-	pid_t   msg_pid;                  /* process id */
+	char    msg_path[MAXPATHLEN]; /* Path to application */
+	uid_t   msg_euid;             /* effective user id */
+	gid_t   msg_egid;             /* effective group id */
+	pid_t   msg_pid;              /* process id */
 } auth_msg_t;
+
+#define AUTH_MODULE_DENY   0
+#define AUTH_MODULE_ALLOW  1
+#define AUTH_MODULE_UNKNOW 2
 
 #define MAX_NAME_LEN 32
 /* Structure defining authentication module */
@@ -86,6 +86,7 @@ typedef struct auth_mod {
 /* auth_mod.c */
 void auth_mod_init(void);
 auth_mod_t*  auth_mod_search(const char *);
+int auth_mod_loop(auth_msg_t *);
 
 /* auth_mod_hash.c */
 int auth_mod_hash_init(prop_dictionary_t, void **);

@@ -78,6 +78,30 @@ auth_mod_search(const char *auth_mod_name)
 }
 
 /*!
+ * Call authentication modules auth routines to receive
+ * authorization for our sender.
+ * @param[in] msg message sender creendentials
+ * @return One entry from AUTH_MODULE_DENY, AUTH_MODULE_UNKNOW,
+ *         AUTH_MODULE_ALLOW.
+ */
+int
+auth_mod_loop(auth_msg_t *msg)
+{
+	auth_mod_t *mod;
+	int ret;
+	
+	SLIST_FOREACH(mod, &auth_mod_list, next_mod) {
+		ret = mod->auth(msg);
+		if ((ret == AUTH_MODULE_DENY) ||
+		    (ret == AUTH_MODULE_UNKNOW)
+			break;
+	}
+	
+	return ret;
+}
+
+
+/*!
  * Initialize auth_module subsystem and setup default auth modules.
  */
 void
