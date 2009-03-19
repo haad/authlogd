@@ -47,10 +47,10 @@ static void parse_app_sect(prop_array_t);
  * Parse configuration file given by user, check file and daemon versions
  * and check if signature for externalized config dictionary is same as
  * givenone.
- * @param whole configuration file dictionary
+ * @param dict whole configuration file dictionary
  * @see verify_config_sign()
  * @todo Add verify code
- * @fixme I have to add certificate to argument list
+ * @bug I have to add certificate to argument list
  */
 int
 parse_config(prop_dictionary_t dict)
@@ -94,8 +94,8 @@ parse_config(prop_dictionary_t dict)
 
 /*!
  * Verify Signature on config block.
- * @fixme Add support for signature checking.
- * @fixme I have to add certificate to argument list
+ * @bug Add support for signature checking.
+ * @bug I have to add certificate to argument list
  */
 static int
 verify_config_sign(prop_dictionary_t config, prop_dictionary_t sign)

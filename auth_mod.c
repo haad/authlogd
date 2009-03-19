@@ -63,7 +63,7 @@ auth_mod_dumplist(void)
 
 /*!
  * Search for auth_mod with given name in a list and return auth_mod_t if found.
- * @param auth_module_name
+ * @param auth_mod_name name of module
  */
 auth_mod_t *
 auth_mod_search(const char *auth_mod_name)
