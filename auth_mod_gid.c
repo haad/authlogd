@@ -85,7 +85,7 @@ auth_mod_gid_conf(prop_object_t conf_obj, const char *path, void *config)
 	
 	conf = config;
 	
-	DPRINTF(("GID auth mdoule configuration routine called\n"));
+	DPRINTF(("GID auth module configuration routine called\n"));
 
 	if (prop_object_type(conf_obj) != PROP_TYPE_NUMBER) {
 		warn("Gid module config element for application %s require <integer> tag\n", path);

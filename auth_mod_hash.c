@@ -104,7 +104,7 @@ auth_mod_hash_conf(prop_object_t conf_obj, const char *path, void *config)
 	
 	conf = config;
 	
-	DPRINTF(("HASH auth mdoule configuration routine called\n"));
+	DPRINTF(("HASH auth module configuration routine called\n"));
 
 	if (prop_object_type(conf_obj) != PROP_TYPE_STRING) {
 		warn("Gid module config element for application %s require <integer> tag\n", path);
