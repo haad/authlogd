@@ -34,8 +34,8 @@ static TAILQ_HEAD(app_head, hash_app_entry) hash_apps_list;
 
 /** Structure describing every application entry */
 typedef struct hash_app_entry {
-	const char path[MAXPATHLEN];
-	const char *hash; /* use longest digest string length here */
+        char  app_path[MAXPATHLEN];
+	char *app_hash; /* use longest digest string length here */
 	TAILQ_ENTRY(hash_app_entry) next_app;
 } hash_app_entry_t;
 
@@ -90,12 +90,37 @@ auth_mod_hash_init(prop_dictionary_t hash_dict, void **hash_config)
  * in configuration file. This routine is being run from config.c::parse_app_sect function.
  *
  * @param app_auth_mod configuration dictionary
+ * @param path to authenticated application
  * @param pointer to auth_mod_configuration from auth_mod::auth_mod_config.
  */
 int
-auth_mod_hash_conf(prop_object_t conf_obj, const char *path, void *auth_mod_config)
+auth_mod_hash_conf(prop_object_t conf_obj, const char *path, void *config)
 {
+	hash_app_entry_t *app;
+	mod_hash_conf_t *conf;
+	gid_t gid;
 
+	assert(config != NULL);
+	
+	conf = config;
+	
+	DPRINTF(("GID auth mdoule configuration routine called\n"));
+
+	if (prop_object_type(conf_obj) != PROP_TYPE_STRING) {
+		warn("Gid module config element for application %s require <integer> tag\n", path);
+		return EXIT_FAILURE;
+	}
+
+	if ((app = malloc(sizeof(hash_app_entry_t))) == NULL)
+		err(EXIT_FAILURE, "Cannot Allocate memory %s\n", __func__);
+	
+	memset(app, 0, sizeof(hash_app_entry_t));
+
+	app->app_hash = prop_string_cstring(conf_obj);
+	strncpy(app->app_path, path, MAXPATHLEN);
+
+	TAILQ_INSERT_HEAD(&hash_apps_list, app, next_app);
+	
 	return 0;
 }
 
