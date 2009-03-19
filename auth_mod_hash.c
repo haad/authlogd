@@ -48,11 +48,29 @@ typedef struct mod_hash_conf {
 #define AUTHMOD_HASH_TYPE "hash_type"
 
 /*!
+ * Search for application in hash_apps_list. 
+ * @param app_path application path.
+ */
+static hash_app_entry_t *
+search_app(const char *app_path) {
+	hash_app_entry_t *app;
+
+	app = NULL;
+	
+	TAILQ_FOREACH(app, &hash_apps_list, next_app) {
+		if (strncmp(app->app_path, app_path, strlen(app->app_path)) == 0)
+			return app;
+	}
+
+	return app;
+}
+
+/*!
  * Initialize auth_module defaults. This routine is being run from
  * config.c::parse_authmod_sect function.
  *
- * @param authentication module specific details which are parsed by module it self.
- * @param double pointer to auth_mod_configuration from auth_mod::auth_mod_config.
+ * @param hash_dict authentication module specific details which are parsed by module it self.
+ * @param hash_config double pointer to auth_mod_configuration from auth_mod::auth_mod_config.
  */
 int
 auth_mod_hash_init(prop_dictionary_t hash_dict, void **hash_config)
@@ -89,9 +107,9 @@ auth_mod_hash_init(prop_dictionary_t hash_dict, void **hash_config)
  * in a application list and add digital hash of application to it for every application
  * in configuration file. This routine is being run from config.c::parse_app_sect function.
  *
- * @param app_auth_mod configuration dictionary
- * @param path to authenticated application
- * @param pointer to auth_mod_configuration from auth_mod::auth_mod_config.
+ * @param conf_obj app_auth_mod configuration dictionary
+ * @param path path to authenticated application
+ * @param config pointer to auth_mod_configuration from auth_mod::auth_mod_config.
  */
 int
 auth_mod_hash_conf(prop_object_t conf_obj, const char *path, void *config)
@@ -128,8 +146,22 @@ auth_mod_hash_conf(prop_object_t conf_obj, const char *path, void *config)
  * Destroy Authentication module config structure.
  */
 void
-auth_mod_hash_destroy(void **auth_mod_config)
+auth_mod_hash_destroy(void **config)
 {
+	hash_app_entry_t *app;
+	mod_hash_conf_t *conf;
+
+	conf = *config;
+
+	while ((app = TAILQ_FIRST(&hash_apps_list)) != NULL) {
+		TAILQ_REMOVE(&hash_apps_list, app, next_app);
+		free(app->app_hash);
+		free(app);
+	}
+
+	free(conf);
+
+	*config = NULL;
 
 	return;
 }
@@ -137,7 +169,7 @@ auth_mod_hash_destroy(void **auth_mod_config)
 /*!
  * Authenticate message message from application described by information from
  * auth_msg_t.
- * @param Structure containig information used for application authentication.
+ * @param auth_msg Structure containig information used for application authentication.
  * @bug I need to findsending application in a application list somehow.
  */
 int
