@@ -173,8 +173,24 @@ auth_mod_hash_destroy(void **config)
  * @bug I need to findsending application in a application list somehow.
  */
 int
-auth_mod_hash_auth(auth_msg_t *auth_msg)
+auth_mod_hash_auth(auth_msg_t *auth_msg, void *config)
 {
+	hash_app_entry_t *app;
+	mod_hash_conf_t *conf;
+	char *hash;
+	int ret;
 
-	return 0;
+	conf = *config;
+	ret = AUTH_MODULE_DENY;
+	
+	if ((app = search_app(auth_msg->msg_path)) == NULL)
+		ret = AUTH_MODULE_UNKNOW;
+
+	if ((hash = conf->mod_hash->filefunc(auth_msg->msg_path, NULL)) == NULL)
+		ret = AUTH_MODULE_UNKNOW;
+
+	if (strncasecmp(app->app_hash, hash, strlen(app->app_hash)) == 0)
+		ret = AUTH_MODULE_ALLOW;
+	
+	return ret;
 }
