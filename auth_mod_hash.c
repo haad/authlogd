@@ -180,7 +180,7 @@ auth_mod_hash_auth(auth_msg_t *auth_msg, void *config)
 	char *hash;
 	int ret;
 
-	conf = *config;
+	conf = config;
 	ret = AUTH_MODULE_DENY;
 	
 	if ((app = search_app(auth_msg->msg_path)) == NULL)

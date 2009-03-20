@@ -78,7 +78,7 @@ typedef struct auth_mod {
 	/* Configure application details for auth_mod */
 	int (*conf)(prop_object_t, const char *, void *);
 	void (*destroy)(void **);
-	int (*auth)(auth_msg_t *);
+	int (*auth)(auth_msg_t *, void *);
 	void *config;
 	SLIST_ENTRY(auth_mod) next_mod;
 } auth_mod_t;
@@ -92,13 +92,13 @@ int auth_mod_loop(auth_msg_t *);
 int auth_mod_hash_init(prop_dictionary_t, void **);
 int auth_mod_hash_conf(prop_object_t, const char *, void *);
 void auth_mod_hash_destroy(void **);
-int auth_mod_hash_auth(auth_msg_t *);
+int auth_mod_hash_auth(auth_msg_t *, void *);
 
 /* auth_mod_gid.c */
 int auth_mod_gid_init(prop_dictionary_t, void **);
 int auth_mod_gid_conf(prop_object_t, const char *, void *);
 void auth_mod_gid_destroy(void **);
-int auth_mod_gid_auth(auth_msg_t *);
+int auth_mod_gid_auth(auth_msg_t *, void *);
 
 /* config.c */
 int parse_config(prop_dictionary_t);

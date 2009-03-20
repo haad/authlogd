@@ -164,14 +164,15 @@ auth_mod_gid_auth(auth_msg_t *auth_msg, void *config)
 {
 	gid_app_entry_t *app;
 	mod_gid_conf_t *conf;
-
-	conf = *config;
+	int ret;
+	
+	conf = config;
 	ret = AUTH_MODULE_DENY;
 	
 	if ((app = search_app(auth_msg->msg_path)) == NULL)
 		ret = AUTH_MODULE_UNKNOW;
 
-	if (auth_msg->msg_egid == app_gid)
+	if (auth_msg->msg_egid == app->app_gid)
 		ret = AUTH_MODULE_ALLOW;
 
 	return ret;

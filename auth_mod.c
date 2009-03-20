@@ -93,7 +93,7 @@ auth_mod_loop(auth_msg_t *msg)
 	SLIST_FOREACH(mod, &auth_mod_list, next_mod) {
 		ret = mod->auth(msg, mod->config);
 		if ((ret == AUTH_MODULE_DENY) ||
-		    (ret == AUTH_MODULE_UNKNOW)
+		    (ret == AUTH_MODULE_UNKNOW))
 			break;
 	}
 	
