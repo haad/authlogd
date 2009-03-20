@@ -66,10 +66,29 @@
 	     <string>268aea7afdb99c39332184fa5fa5affa5f5cc60e</string> <!--Digital hash generated with $hash_type algorithm-->
 	   </dict>
 	   <dict>
+	     <key>auth_mod</key>	     
+	     <string>auth_gid</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <integer>1682</integer> <!--Auth group id for this app-->
+	   </dict>
+	 </array>
+       </dict>
+       <dict>
+	 <key>app_path</key> <!--Path to application-->
+	 <string>/usr/src/local/devel/authlogd/doc/logger</string>
+	 <key>appmod_config</key>
+	 <array>
+	   <dict>
+	     <key>auth_mod</key>
+	     <string>auth_hash</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <string>26c4978a4ba7baf47f4da53cf3da6bbaa5f72628</string> <!--Digital hash generated with $hash_type algorithm-->
+	   </dict>
+	   <dict>
 	     <key>auth_mod</key>
 	     <string>auth_gid</string> <!--Auth module name-->
 	     <key>auth_mod_data</key>
-	     <integer>1683</integer> <!--Auth group id for this app-->
+	     <integer>100</integer> <!--Auth group id for this app-->
 	   </dict>
 	 </array>
        </dict>
