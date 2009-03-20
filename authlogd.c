@@ -133,7 +133,7 @@ dolog(int soc)
 	struct unpcbid unp;
 	auth_msg_t *auth;
 	int unp_size = sizeof(unp);
-	int i;
+	int i, ret;
 	int nsoc;
 
 	if ((listen(soc, 0)) == -1)
@@ -153,11 +153,15 @@ dolog(int soc)
 			err(EXIT_FAILURE, "Cannot get LOCAL_PEERID message from soc\n");
 
 		auth = unptoauth(&unp);
+
+		ret = auth_mod_loop(auth);
+
+		DPRINTF(("Authentication module framework returned %d\n", ret));
 		
 		close(nsoc);
 	}
+		    
 	return 0;
-	
 }
 
 /*!
