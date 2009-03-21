@@ -16,12 +16,15 @@
 
 #define AUTHLOG_PATH "/var/run/authlog"
 
+char buf1[] = "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8";
+char buf2[] = "<165>1 2003-10-11T22:14:15.003Z mymachine.example.com evntslog - ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"] BOMAn application event log entry";
+
 int
 main(int argc, char *argv[])
 {
 	int s;
 	struct sockaddr_un sa;
-	
+		
 	/*
 	 * Set up socket variables (address family; name of server socket)
 	 * (they'll be used later for the connect() call)
@@ -48,6 +51,11 @@ main(int argc, char *argv[])
 
 	printf("My creds are gid: %d, uid: %d, pid: %d\n", getegid(), geteuid(), getpid());
 
+	send(s, buf1, sizeof(buf1), 0);
+
+	send(s, buf2, sizeof(buf2), 0);
+	
+	
 	close(s);
 	
 	return 0;
