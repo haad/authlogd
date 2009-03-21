@@ -113,8 +113,10 @@ main(int argc, char **argv)
 	/** Parse configuration file and init auth modules info. */
 	parse_config(conf_buf);
 
+	/** Open authenticated log */
 	soc = openauthlog(AUTH_LOG_PATH);
 
+	/** Listen on auth log and process receiveed packets */
 	dolog(soc);
 
 	
@@ -123,6 +125,7 @@ main(int argc, char **argv)
 
 /*!
  * Authenticate Logging process after accept and do Logging after it.
+ * We will authenticate every application only after calling connect/accept.
  * @param[in] soc socket opened with openauthlog()
  * @see openauthlog()
  */
@@ -142,21 +145,25 @@ dolog(int soc)
 	while(1) {
 		
 		i = sizeof(struct sockaddr_un);
-		/*
+		/*!
 		 * Call accept() to accept connection request. This call will block
 		 * until a connection request arrives.
 		 */
 		if ((nsoc = accept(soc, (struct sockaddr *)&addr, &i)) == -1)
 			err(EXIT_FAILURE, "Accept failed %s\n", __func__);
-
+		/** Get information about connected peer */
 		if (getsockopt(nsoc, 0, LOCAL_PEEREID, &unp, &unp_size) < 0)
 			err(EXIT_FAILURE, "Cannot get LOCAL_PEERID message from soc\n");
 
+		/** convert info to our representation */
 		auth = unptoauth(&unp);
 
+		/** Check all configured auth modules */
 		ret = auth_mod_loop(auth);
 
 		DPRINTF(("Authentication module framework returned %d\n", ret));
+
+		/*XXX There is 5 space chars from start ofpage to start of SD element part. */
 		
 		close(nsoc);
 	}
