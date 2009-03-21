@@ -58,12 +58,25 @@
 #define AUTH_LOG_PATH "/var/run/authlog"
 #define AUTHLOG_VERSION 1
 
+#define AUTHLOG_MESSAGE_LEN 4096
+#define AUTHLOG_AUTH_SD 512
+
 typedef struct auth_msg {
-	char    msg_path[MAXPATHLEN]; /* Path to application */
-	uid_t   msg_euid;             /* effective user id */
-	gid_t   msg_egid;             /* effective group id */
-	pid_t   msg_pid;              /* process id */
+	char    msg_path[MAXPATHLEN]; /** Path to application */
+	uid_t   msg_euid;             /** Effective user id */
+	gid_t   msg_egid;             /** Effective group id */
+	pid_t   msg_pid;              /** Process id */
+	int     msg_auth_status;      /** Status of message after auth process */
 } auth_msg_t;
+
+typedef struct msg {
+	size_t msg_size;
+	char msg_buf[AUTHLOG_MESSAGE_LEN];
+	char msg_auth_sd[AUTHLOG_AUTH_SD];
+	char *msg_header;
+	char *msg_body;
+	auth_msg_t *auth_msg;
+} msg_t;
 
 #define AUTH_MODULE_DENY   0
 #define AUTH_MODULE_ALLOW  1
@@ -73,12 +86,15 @@ typedef struct auth_msg {
 /* Structure defining authentication module */
 typedef struct auth_mod {
 	char name[MAX_NAME_LEN];
-	/* Initialize auth_mod defaults from dictionary */
+	/** Initialize auth_mod defaults from dictionary */
   	int (*init)(prop_dictionary_t, void **);
-	/* Configure application details for auth_mod */
+	/** Configure application details for auth_mod */
 	int (*conf)(prop_object_t, const char *, void *);
+	/** Remove auth module configuration structure and destroy application list */
 	void (*destroy)(void **);
+	/** Authorize application for loggind */
 	int (*auth)(auth_msg_t *, void *);
+	/** Module config */
 	void *config;
 	SLIST_ENTRY(auth_mod) next_mod;
 } auth_mod_t;
@@ -101,6 +117,9 @@ void auth_mod_gid_destroy(void **);
 int auth_mod_gid_auth(auth_msg_t *, void *);
 
 /* config.c */
-int parse_config(prop_dictionary_t);
+void parse_config(prop_dictionary_t);
+
+/* msg.c */
+void parse_msg(msg_t *);
 
 #endif

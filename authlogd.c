@@ -135,8 +135,9 @@ dolog(int soc)
 	struct sockaddr_un addr;
 	struct unpcbid unp;
 	auth_msg_t *auth;
+	msg_t *msg;
 	int unp_size = sizeof(unp);
-	int i, ret;
+	int i, ret, recv_size;
 	int nsoc;
 
 	if ((listen(soc, 0)) == -1)
@@ -163,9 +164,30 @@ dolog(int soc)
 
 		DPRINTF(("Authentication module framework returned %d\n", ret));
 
-		/*XXX There is 5 space chars from start ofpage to start of SD element part. */
-		
+		while (1) {
+			if ((msg = malloc(sizeof(msg_t))) == NULL)
+				err(EXIT_FAILURE, "Cannot allocate more memory %s.\n", __func__);
+
+			memset(msg, 0, sizeof(msg_t));
+
+			msg->auth_msg = auth;
+			
+			msg->msg_size = recvfrom(nsoc, msg->msg_buf, sizeof(msg->msg_buf), 0, NULL, NULL);
+			if (msg->msg_size == -1)
+				err(EXIT_FAILURE, "Recv call failed %s\n.", __func__);
+
+			/** recv_size 0 means EOF from other side. */
+			if (msg->msg_size == 0)
+				break;
+
+			parse_msg(msg);
+			/*XXX There is 5 space chars from start ofpage to start of SD element part. */
+			//printf("Received message\n %s\n", buf);
+
+			free(msg);
+		}
 		close(nsoc);
+		free(auth);
 	}
 		    
 	return 0;
@@ -188,8 +210,8 @@ openauthlog(const char *path)
 	if ((soc = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
 		err(EXIT_FAILURE, "%s call failed\n", __func__);
 
-	if (setsockopt(soc, SOL_SOCKET, LOCAL_CREDS, &on, sizeof(on)) < 0)
-		err(EXIT_FAILURE, "Cannot set LOCAL_CREDS flag on %s soc\n", path);
+//	if (setsockopt(soc, SOL_SOCKET, LOCAL_CREDS, &on, sizeof(on)) < 0)
+//		err(EXIT_FAILURE, "Cannot set LOCAL_CREDS flag on %s soc\n", path);
 
 	memset(&addr, 0, sizeof(addr));
 	addr.sun_family = AF_LOCAL;

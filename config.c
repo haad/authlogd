@@ -52,7 +52,7 @@ static void parse_app_sect(prop_array_t);
  * @todo Add verify code
  * @bug I have to add certificate to argument list
  */
-int
+void
 parse_config(prop_dictionary_t dict)
 {
 	uint32_t version;
@@ -88,7 +88,7 @@ parse_config(prop_dictionary_t dict)
 
 	parse_app_sect(app);
 	
-	return 0;
+	return;
 }
 
 

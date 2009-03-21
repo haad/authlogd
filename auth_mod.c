@@ -96,7 +96,8 @@ auth_mod_loop(auth_msg_t *msg)
 		    (ret == AUTH_MODULE_UNKNOW))
 			break;
 	}
-	
+
+	msg->msg_auth_status = ret;
 	return ret;
 }
 
