@@ -82,7 +82,7 @@
 	     <key>auth_mod</key>
 	     <string>auth_hash</string> <!--Auth module name-->
 	     <key>auth_mod_data</key>
-	     <string>26c4978a4ba7baf47f4da53cf3da6bbaa5f72628</string> <!--Digital hash generated with $hash_type algorithm-->
+	     <string>c1e7ccebae193212fc1df7e3e7b55e65d134ece9</string> <!--Digital hash generated with $hash_type algorithm-->
 	   </dict>
 	   <dict>
 	     <key>auth_mod</key>
