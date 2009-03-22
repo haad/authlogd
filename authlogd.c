@@ -45,8 +45,9 @@
 
 #include "authlogd.h"
 
-static int dolog(int);
+static int dolog(int, int);
 static int openauthlog(const char *);
+static int opensyslog(const char *);
 static auth_msg_t * unptoauth(struct unpcbid *);
 static void usage(void);
 
@@ -67,15 +68,18 @@ static void usage(void);
  *
  */
 
+const char *syslog_path;
 
 int
 main(int argc, char **argv)
 {
-	int ch, soc;
+	int ch, soc, syssoc;
 	int conf_cert;
 	prop_dictionary_t conf_buf;
+
+	syslog_path = SYSLOG_PATH;
 	
-  	while ((ch = getopt(argc, argv, "P:p:C:c:h")) != -1 )
+  	while ((ch = getopt(argc, argv, "P:p:C:c:S:h")) != -1 )
 		switch(ch){
 			
 		case 'h':
@@ -97,6 +101,13 @@ main(int argc, char **argv)
 				err(EXIT_FAILURE, "Cannot Internalize config file to buffer\n");
 		}
 		break;
+		case'S':
+		{
+			syslog_path = (const char *)optarg;
+			DPRINTF(("Syslog socket path is %s\n", syslog_path));
+			
+		}
+		break;
 		default:
 			usage();
 			/* NOTREACHED */
@@ -113,11 +124,14 @@ main(int argc, char **argv)
 	/** Parse configuration file and init auth modules info. */
 	parse_config(conf_buf);
 
+	/** Open Syslog socket */
+	syssoc = opensyslog(syslog_path);
+	
 	/** Open authenticated log */
 	soc = openauthlog(AUTH_LOG_PATH);
 
 	/** Listen on auth log and process receiveed packets */
-	dolog(soc);
+	dolog(soc, syssoc);
 
 	
 	return EXIT_SUCCESS;
@@ -130,7 +144,7 @@ main(int argc, char **argv)
  * @see openauthlog()
  */
 static int
-dolog(int soc)
+dolog(int soc, int syssoc)
 {
 	struct sockaddr_un addr;
 	struct unpcbid unp;
@@ -181,9 +195,9 @@ dolog(int soc)
 				break;
 
 			parse_msg(msg);
-			/*XXX There is 5 space chars from start ofpage to start of SD element part. */
-			//printf("Received message\n %s\n", buf);
 
+			send(syssoc, msg->msg_new, strlen(msg->msg_new), 0);
+			
 			free(msg);
 		}
 		close(nsoc);
@@ -191,6 +205,30 @@ dolog(int soc)
 	}
 		    
 	return 0;
+}
+
+static int
+opensyslog(const char *path)
+{
+	struct sockaddr_un addr;
+	int on = 1;
+	int syssoc;
+	int ret;
+
+	/** Create socket for authenticated logging */
+	if ((syssoc = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
+		err(EXIT_FAILURE, "%s call failed\n", __func__);
+
+	memset(&addr, 0, sizeof(addr));
+	addr.sun_family = AF_LOCAL;
+	if (strlen(path) >= sizeof(addr.sun_path))
+		err(EXIT_FAILURE, "Path to soc si too long %s\n", path);
+
+	strncpy(addr.sun_path, path, sizeof(addr.sun_path));
+	if ((ret = connect(syssoc, (const struct sockaddr *)&addr, SUN_LEN(&addr))) != 0)
+		err(EXIT_FAILURE, "Cannot bind to auth log soc %s\n", path);
+
+	return syssoc;
 }
 
 /*!

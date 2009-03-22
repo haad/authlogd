@@ -55,6 +55,8 @@
 	} while(/*CONSTCOND*/0)
 #endif
 
+#define SYSLOG_PATH "/var/run/log"
+
 #define AUTH_LOG_PATH "/var/run/authlog"
 #define AUTHLOG_VERSION 1
 
@@ -72,6 +74,7 @@ typedef struct auth_msg {
 typedef struct msg {
 	size_t msg_size;
 	char msg_buf[AUTHLOG_MESSAGE_LEN];
+	char msg_new[AUTHLOG_MESSAGE_LEN];
 	char msg_auth_sd[AUTHLOG_AUTH_SD];
 	char *msg_header;
 	char *msg_body;

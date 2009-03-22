@@ -16,6 +16,9 @@ static void get_auth_sd(msg_t *);
 
 /*!
  * Parse syslog message and fills msg_t structure.
+ * @bug I need to validate syslog message, we can use only syslog
+ *      protocol messages with valid syntax.
+ * @param msg General syslog message description structure.
  */
 void
 parse_msg(msg_t *msg)
@@ -23,7 +26,9 @@ parse_msg(msg_t *msg)
 	find_sd(msg);
 	get_auth_sd(msg);
 
-	printf("%s%s%s\n", msg->msg_header, msg->msg_auth_sd, msg->msg_body);
+	/** There is 6 space chars from message start to start of SD element part. */
+	snprintf(msg->msg_new, sizeof(msg->msg_new), "%s%s%s\n",
+	    msg->msg_header, msg->msg_auth_sd, msg->msg_body);
 }
 
 
@@ -37,7 +42,6 @@ get_auth_sd(msg_t *msg)
 {
 	char *sign = '\0';
 	char *status;
-	
 #define AUTHORIZE   "Authorized"
 #define DENY        "Denied"
 #define UNKNOWN     "Unknown"	
