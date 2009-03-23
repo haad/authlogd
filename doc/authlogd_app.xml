@@ -98,7 +98,7 @@
    <key>sign</key> <!--Crypto sign block guarding configuration part of file-->
    <dict>
      <key>sign_block</key>
-     <string></string> <!--base64 encoded sign for config dictionary -->
+     <string>302d021500a65a81f5e522c30a9c67ba26d68a3c5d8f3815f002145ee08486417e270b40e978218b95f7db062d9108</string> <!--base64 encoded sign for config dictionary -->
      <key>sign_cert</key>
      <string></string> <!--base64 encoded certificate which was used to sign config dictionary -->
    </dict>
