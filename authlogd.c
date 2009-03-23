@@ -69,15 +69,20 @@ static void usage(void);
  */
 
 const char *syslog_path;
+char cert_file[MAXPATHLEN];
+char pubk_file[MAXPATHLEN];
+char privk_file[MAXPATHLEN];
 
 int
 main(int argc, char **argv)
 {
 	int ch, soc, syssoc;
 	int flg_cert, flg_cnf, flg_dump;
+	size_t len;
 	prop_dictionary_t conf_buf;
 
 	syslog_path = SYSLOG_PATH;
+	len = 0;
 	
   	while ((ch = getopt(argc, argv, "P:p:C:c:S:hd")) != -1 )
 		switch(ch){
@@ -88,10 +93,13 @@ main(int argc, char **argv)
 			break;
 		case 'C':
 		{
-			/* Public key used to verify config file. */
+			/* Public key certificate to verify config file. */
 			flg_cert = 1;
-			/** @bug Load Cert from file and pass it to config
-			   file parsing routines */
+			if ((len = strlen((char *)optarg)) > MAXPATHLEN)
+				len = MAXPATHLEN - 1;
+			
+			strncpy(cert_file, (char *)optarg, len);
+			cert_file[len + 1] = '\0';
 		}
 		break;
 		case 'c':
@@ -100,6 +108,26 @@ main(int argc, char **argv)
 			if ((conf_buf = prop_dictionary_internalize_from_file((char *)optarg)) == NULL)
 				err(EXIT_FAILURE, "Cannot Internalize config file to buffer\n");
 			flg_cnf = 1;
+		}
+		break;
+		case 'P':
+		{
+			/* Private key used to verify config file. */
+			if ((len = strlen((char *)optarg)) > MAXPATHLEN)
+				len = MAXPATHLEN - 1;
+			
+			strncpy(privk_file, (char *)optarg, len);
+			privk_file[len + 1] = '\0';
+		}
+		break;
+		case 'p':
+		{
+			/* Public key used to verify config file. */
+			if ((len = strlen((char *)optarg)) > MAXPATHLEN)
+				len = MAXPATHLEN - 1;
+			
+			strncpy(pubk_file, (char *)optarg, len);
+			pubk_file[len + 1] = '\0';
 		}
 		break;
 		case 'd':

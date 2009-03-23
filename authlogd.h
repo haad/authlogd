@@ -126,4 +126,10 @@ void dump_config(prop_dictionary_t, const char *);
 /* msg.c */
 void parse_msg(msg_t *);
 
+/* ssl.c */
+void authlogd_ssl_init(void);
+void authlogd_sign_init(void);
+char * authlogd_sign_buf(const char *, size_t);
+int authlogd_verify_buf(const char *, size_t, const char *, size_t);
+
 #endif
