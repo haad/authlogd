@@ -80,6 +80,10 @@ authlogd_sign_init(void)
 	}
 }
 
+/*!
+ * Generate signature of buffer buff.
+ * @return Dynamically allocated string caller is responsible for releasing.
+ */
 char *
 authlogd_sign_buf(const char *buff, size_t len)
 {
@@ -100,6 +104,13 @@ authlogd_sign_buf(const char *buff, size_t len)
 	return signature;
 }
 
+/*!
+ * Verfify signature sign against buffer config.
+ * @param config buffer with signed data
+ * @param config_len buffer len
+ * @param sign buffer with signature
+ * @param sign_len buffer signature len
+ */
 int
 authlogd_verify_buf(const char *config, size_t config_len, 
 	const char *sign, size_t sign_len)
@@ -112,6 +123,9 @@ authlogd_verify_buf(const char *config, size_t config_len,
 	return 0;
 }
 
+/*!
+ * Initialize Openssl library for using.
+ */
 void
 authlogd_ssl_init(void)
 {
