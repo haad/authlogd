@@ -121,6 +121,7 @@ int auth_mod_gid_auth(auth_msg_t *, void *);
 
 /* config.c */
 void parse_config(prop_dictionary_t);
+void dump_config(prop_dictionary_t, const char *);
 
 /* msg.c */
 void parse_msg(msg_t *);

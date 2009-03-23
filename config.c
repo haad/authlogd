@@ -182,3 +182,21 @@ parse_app_sect(prop_array_t app_array)
 	}
 	return;
 }
+
+/*!
+ * Dump part of configuration file used for sign.
+ * @param dict Configuration dictionary
+ * @param path Path where we are going to externalize config section
+ */
+void
+dump_config(prop_dictionary_t dict, const char *path)
+{
+	prop_dictionary_t config;
+
+	if ((config = prop_dictionary_get(dict, CF_CONFIG)) == NULL)
+		err(EXIT_FAILURE, "Config file doesn't have required %s section.\n", CF_CONFIG);
+
+	prop_dictionary_externalize_to_file(config, path);
+
+	return;
+}

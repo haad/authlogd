@@ -74,12 +74,12 @@ int
 main(int argc, char **argv)
 {
 	int ch, soc, syssoc;
-	int conf_cert;
+	int flg_cert, flg_cnf, flg_dump;
 	prop_dictionary_t conf_buf;
 
 	syslog_path = SYSLOG_PATH;
 	
-  	while ((ch = getopt(argc, argv, "P:p:C:c:S:h")) != -1 )
+  	while ((ch = getopt(argc, argv, "P:p:C:c:S:hd")) != -1 )
 		switch(ch){
 			
 		case 'h':
@@ -89,7 +89,7 @@ main(int argc, char **argv)
 		case 'C':
 		{
 			/* Public key used to verify config file. */
-			conf_cert = 1;
+			flg_cert = 1;
 			/** @bug Load Cert from file and pass it to config
 			   file parsing routines */
 		}
@@ -99,6 +99,12 @@ main(int argc, char **argv)
 			DPRINTF(("Internalizing proplib authenticated application file %s\n", (char *)optarg));
 			if ((conf_buf = prop_dictionary_internalize_from_file((char *)optarg)) == NULL)
 				err(EXIT_FAILURE, "Cannot Internalize config file to buffer\n");
+			flg_cnf = 1;
+		}
+		break;
+		case 'd':
+		{
+			flg_dump = 1;
 		}
 		break;
 		case'S':
@@ -115,8 +121,15 @@ main(int argc, char **argv)
 	argc-=optind;
 	argv+=optind;
 
-	if (!conf_cert)
+	if (!flg_cert || !flg_cnf)
 		return EXIT_FAILURE;
+
+	/** Dump part of configuration file which can be used for signing */
+	if (flg_dump) {
+		DPRINTF(("Dumping configuration file to: config.xml\n"));
+		dump_config(conf_buf, "config.xml");
+		return EXIT_SUCCESS;
+	}
 
 	/** Initialize precompiled authentication modules. */
 	auth_mod_init();
