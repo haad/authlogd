@@ -1,0 +1,14 @@
+
+		OpenSSL Howto
+
+Signature Generation 
+
+openssl dgst -sha1 -sign doc/dsaprivkey.pem -keyform PEM -hex {filename to sign}
+
+Signature verification 
+
+openssl dgst -sha1 -verify doc/dsapubkey.pem -signature {signature file} {signed file}
+
+Authlogd part
+
+authlogd -c doc/authlogd_app.xml -d  -> dump singing part of configuration to config.xml
