@@ -14,14 +14,14 @@
 #include "authlogd.h"
 
 
-/* this struct defines a hash algorithm */
+/*! this struct defines a hash algorithm */
 typedef struct hash_t {
 	const char *hashname; /* algorithm name */
 	char* (*filefunc)(const char *, char *); /* function */
 	uint16_t digest_len;
 } hash_t;
 
-/* define the possible hash algorithms */
+/*! define the possible hash algorithms */
 static hash_t hashes[] = {
 	{ "SHA1", SHA1File, SHA1_DIGEST_STRING_LENGTH },
 	{ "SHA256", SHA256_File, SHA256_DIGEST_STRING_LENGTH },
@@ -32,14 +32,14 @@ static hash_t hashes[] = {
 
 static TAILQ_HEAD(app_head, hash_app_entry) hash_apps_list;
 
-/** Structure describing every application entry */
+/*! Structure describing every application entry */
 typedef struct hash_app_entry {
         char  app_path[MAXPATHLEN];
 	char *app_hash; /* use longest digest string length here */
 	TAILQ_ENTRY(hash_app_entry) next_app;
 } hash_app_entry_t;
 
-/** Strucutre storing default settings for hash auth module */
+/*! Structure storing default settings for hash auth module */
 typedef struct mod_hash_conf {
 	hash_t *mod_hash; /* Hash function used as default */
 } mod_hash_conf_t;
