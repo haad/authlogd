@@ -83,6 +83,9 @@ main(int argc, char **argv)
 
 	syslog_path = SYSLOG_PATH;
 	len = 0;
+	flg_dump = 0;
+	flg_cnf = 0;
+	flg_cert = 0;
 	
   	while ((ch = getopt(argc, argv, "P:p:C:c:S:hd")) != -1 )
 		switch(ch){
@@ -149,7 +152,7 @@ main(int argc, char **argv)
 	argc-=optind;
 	argv+=optind;
 
-	if (!flg_cert || !flg_cnf)
+	if (!flg_cnf)
 		return EXIT_FAILURE;
 
 	/** Dump part of configuration file which can be used for signing */
@@ -158,6 +161,9 @@ main(int argc, char **argv)
 		dump_config(conf_buf, "config.xml");
 		return EXIT_SUCCESS;
 	}
+
+	if (!flg_cert)
+	  return EXIT_FAILURE;
 
 	/** Initialize precompiled authentication modules. */
 	auth_mod_init();
@@ -234,9 +240,11 @@ dolog(int soc, int syssoc)
 			/** recv_size 0 means EOF from other side. */
 			if (msg->msg_size == 0)
 				break;
-
+			
+			/** Parse msg_t and create authlogd sd elements save result to msg_t::msg_new. */
 			parse_msg(msg);
 
+			/** Send message with auth SD element to syslog. */
 			send(syssoc, msg->msg_new, strlen(msg->msg_new), 0);
 			
 			free(msg);
