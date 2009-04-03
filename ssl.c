@@ -95,6 +95,8 @@ authlogd_verify_init(void)
 
 /*!
  * Generate signature of buffer buff.
+ * @param buff text for which we are generating signature
+ * @param buff buffer length
  * @return Dynamically allocated string caller is responsible for releasing.
  */
 char *

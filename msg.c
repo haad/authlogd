@@ -56,6 +56,8 @@ get_auth_sd(msg_t *msg)
 		status = UNKNOWN;
 		break;
 	}
+	
+	sign = authlogd_sign_buf(status, strlen(status));
 		
 	snprintf(msg->msg_auth_sd, AUTHLOG_AUTH_SD, " [@authlogd msg=\"%s\" sign=\"%s\"]", status, sign);
 		
