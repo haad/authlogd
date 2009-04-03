@@ -49,7 +49,6 @@
 
 static struct event * allocev(void);
 static void dolog(int, short, void *);
-static void die(int, short, void *);
 static int openauthlog(const char *);
 static int opensyslog(const char *);
 static auth_msg_t * unptoauth(struct unpcbid *);
@@ -83,7 +82,7 @@ int syssoc;    /** Slyslogd socket */
 int
 main(int argc, char **argv)
 {
-	int ch, soc;
+	int ch, soc, ret;
 	int flg_cert, flg_cnf, flg_dump;
 	size_t len;
 	prop_dictionary_t conf_buf;
@@ -195,45 +194,22 @@ main(int argc, char **argv)
 	 */
 	(void)event_init();
 	
-	/*
-	 * Always exit on SIGTERM.  Also exit on SIGINT and SIGQUIT
-	 * if we're debugging.
-	 */
-	(void)signal(SIGTERM, SIG_IGN);
-	(void)signal(SIGINT, SIG_IGN);
-	(void)signal(SIGQUIT, SIG_IGN);
-	
-	/* 
-	 * Set signal handlers for SIGTERM, SIGINT and SIGQUIT.
-	 * The lasttwo handlers are set only if we are running 
-	 * authlogd in debug mode.
-	 */ 
-	ev = allocev();
-	signal_set(ev, SIGTERM, die, ev);
-	event_add(ev, NULL);
-
-	if (flg_debug) {
-		ev = allocev();
-		signal_set(ev, SIGINT, die, ev);
-		event_add(ev, NULL);
-		ev = allocev();
-		signal_set(ev, SIGQUIT, die, ev);
-		event_add(ev, NULL);
-	}
-
 	/** Open Syslog socket */
 	syssoc = opensyslog(syslog_path);
 	
 	/** Open authenticated log */
 	soc = openauthlog(AUTH_LOG_PATH);
 
-	/** Listen on auth log and process receiveed packets */
+	/** Listen on auth log and process received packets */
 	ev = allocev();
 	event_set(ev, soc, EV_READ | EV_PERSIST, dolog, ev);
 	event_add(ev, NULL);
-
 	
-	return EXIT_SUCCESS;
+	ret = event_dispatch();
+	/* normal termination via die(), reaching this is an error */
+	DPRINTF(("event_dispatch() returned %d\n", ret));
+	
+	return ret;
 }
 
 /*!
@@ -315,7 +291,7 @@ opensyslog(const char *path)
 	int ret;
 
 	/** Create socket for authenticated logging */
-	if ((syssoc = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
+	if ((syssoc = socket(AF_UNIX, SOCK_DGRAM, 0)) < 0)
 		err(EXIT_FAILURE, "Error: %s %s %.4d\n",
 		 __FILE__, __func__, __LINE__);
 
@@ -327,7 +303,7 @@ opensyslog(const char *path)
 
 	strncpy(addr.sun_path, path, sizeof(addr.sun_path));
 	if ((ret = connect(syssoc, (const struct sockaddr *)&addr, SUN_LEN(&addr))) != 0)
-		err(EXIT_FAILURE, "Cannot bind to auth log soc %s %s %s %.4d\n",
+		err(EXIT_FAILURE, "Cannot connect to syslog log socket %s %s %s %.4d\n",
 		path, __FILE__, __func__, __LINE__);
 
 	return syssoc;
@@ -363,6 +339,10 @@ openauthlog(const char *path)
 	strncpy(addr.sun_path, path, sizeof(addr.sun_path));
 	if ((ret = bind(soc, (const struct sockaddr *)&addr, SUN_LEN(&addr))) != 0)
 		err(EXIT_FAILURE, "Cannot bind to auth log soc %s %s %s %.4d\n",
+		 path, __FILE__, __func__, __LINE__);
+
+	if ((listen(soc, 0)) == -1)
+		err(EXIT_FAILURE, "Listen Call failed %s %s %s %.4d\n",
 		 path, __FILE__, __func__, __LINE__);
 
 	return soc;
@@ -410,21 +390,6 @@ unptoauth(struct unpcbid *unp)
 	DPRINTF(("Application path %s\n", proc_path));
 	
 	return auth;
-}
-
-/*!
- * Prepare authlogd to exit correctly, close all 
- * opened sockets, flush output and do all needed 
- * stuff. Called from singal handlers set in main()
- * with EV_ADD.
- * @param fd Descriptor where we have received event
- * @param event type of event
- * @param ev 
- */
-void
-die(int fd, short event, void *ev)
-{
-	exit(0);
 }
 
 /*!
