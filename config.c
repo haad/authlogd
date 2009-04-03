@@ -108,7 +108,10 @@ verify_config_sign(prop_dictionary_t config, prop_dictionary_t sign)
 	
 	prop_dictionary_get_cstring_nocopy(sign, CF_SIGN_BLOCK, &signb);
 		
-	authlogd_verify_buf(conf, strlen(conf), signb, strlen(signb));
+	if ((authlogd_verify_buf(conf, strlen(conf), signb, strlen(signb))) == 0)
+		err(EXIT_FAILURE, "Cannot validate config file\n");
+	
+	DPRINTF(("Config file digital signature validated!!\n"));
 	
 	return 0;
 }
