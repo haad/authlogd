@@ -30,7 +30,8 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <sys/time.h>
+     
 #include <sys/un.h>
 
 #include <netinet/in.h>
@@ -38,6 +39,7 @@
 
 #include <err.h>
 #include <errno.h>
+#include <event.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,7 +47,9 @@
 
 #include "authlogd.h"
 
-static int dolog(int, int);
+static struct event * allocev(void);
+static void dolog(int, short, void *);
+static void die(int, short, void *);
 static int openauthlog(const char *);
 static int opensyslog(const char *);
 static auth_msg_t * unptoauth(struct unpcbid *);
@@ -73,13 +77,17 @@ char cert_file[MAXPATHLEN];
 char pubk_file[MAXPATHLEN];
 char privk_file[MAXPATHLEN];
 
+uint8_t flg_debug; /** Debug flag */
+int syssoc;    /** Slyslogd socket */
+
 int
 main(int argc, char **argv)
 {
-	int ch, soc, syssoc;
+	int ch, soc;
 	int flg_cert, flg_cnf, flg_dump;
 	size_t len;
 	prop_dictionary_t conf_buf;
+	struct event *ev;
 
 	syslog_path = SYSLOG_PATH;
 	len = 0;
@@ -87,7 +95,7 @@ main(int argc, char **argv)
 	flg_cnf = 0;
 	flg_cert = 0;
 	
-  	while ((ch = getopt(argc, argv, "P:p:C:c:S:hd")) != -1 )
+  	while ((ch = getopt(argc, argv, "P:p:C:c:S:hdD")) != -1 )
 		switch(ch){
 			
 		case 'h':
@@ -109,13 +117,14 @@ main(int argc, char **argv)
 		{
 			DPRINTF(("Internalizing proplib authenticated application file %s\n", (char *)optarg));
 			if ((conf_buf = prop_dictionary_internalize_from_file((char *)optarg)) == NULL)
-				err(EXIT_FAILURE, "Cannot Internalize config file to buffer\n");
+				err(EXIT_FAILURE, "Cannot Internalize config file to buffer %s %s %.4d\n",
+				 __FILE__, __func__, __LINE__);
 			flg_cnf = 1;
 		}
 		break;
 		case 'P':
 		{
-			/* Private key used to verify config file. */
+			/* Private key used to sign auth messages. */
 			if ((len = strlen((char *)optarg)) > MAXPATHLEN)
 				len = MAXPATHLEN - 1;
 			
@@ -136,6 +145,11 @@ main(int argc, char **argv)
 		case 'd':
 		{
 			flg_dump = 1;
+		}
+		break;
+		case 'D':
+		{
+			flg_debug = 1;
 		}
 		break;
 		case'S':
@@ -171,6 +185,37 @@ main(int argc, char **argv)
 	/** Parse configuration file and init auth modules info. */
 	parse_config(conf_buf);
 
+	/*
+	 * Create the global kernel event descriptor.
+	 */
+	(void)event_init();
+	
+	/*
+	 * Always exit on SIGTERM.  Also exit on SIGINT and SIGQUIT
+	 * if we're debugging.
+	 */
+	(void)signal(SIGTERM, SIG_IGN);
+	(void)signal(SIGINT, SIG_IGN);
+	(void)signal(SIGQUIT, SIG_IGN);
+	
+	/* 
+	 * Set signal handlers for SIGTERM, SIGINT and SIGQUIT.
+	 * The lasttwo handlers are set only if we are running 
+	 * authlogd in debug mode.
+	 */ 
+	ev = allocev();
+	signal_set(ev, SIGTERM, die, ev);
+	event_add(ev, NULL);
+
+	if (flg_debug) {
+		ev = allocev();
+		signal_set(ev, SIGINT, die, ev);
+		event_add(ev, NULL);
+		ev = allocev();
+		signal_set(ev, SIGQUIT, die, ev);
+		event_add(ev, NULL);
+	}
+
 	/** Open Syslog socket */
 	syssoc = opensyslog(syslog_path);
 	
@@ -178,7 +223,9 @@ main(int argc, char **argv)
 	soc = openauthlog(AUTH_LOG_PATH);
 
 	/** Listen on auth log and process receiveed packets */
-	dolog(soc, syssoc);
+	ev = allocev();
+	event_set(ev, soc, EV_READ | EV_PERSIST, dolog, ev);
+	event_add(ev, NULL);
 
 	
 	return EXIT_SUCCESS;
@@ -190,8 +237,8 @@ main(int argc, char **argv)
  * @param[in] soc socket opened with openauthlog()
  * @see openauthlog()
  */
-static int
-dolog(int soc, int syssoc)
+static void
+dolog(int fd, short event, void *ev)
 {
 	struct sockaddr_un addr;
 	struct unpcbid unp;
@@ -200,60 +247,58 @@ dolog(int soc, int syssoc)
 	int unp_size = sizeof(unp);
 	int i, ret, recv_size;
 	int nsoc;
-
-	if ((listen(soc, 0)) == -1)
-		err(EXIT_FAILURE, "Listen Call failed %s\n.", __func__);
-
-	while(1) {
 		
-		i = sizeof(struct sockaddr_un);
-		/*!
-		 * Call accept() to accept connection request. This call will block
-		 * until a connection request arrives.
-		 */
-		if ((nsoc = accept(soc, (struct sockaddr *)&addr, &i)) == -1)
-			err(EXIT_FAILURE, "Accept failed %s\n", __func__);
-		/** Get information about connected peer */
-		if (getsockopt(nsoc, 0, LOCAL_PEEREID, &unp, &unp_size) < 0)
-			err(EXIT_FAILURE, "Cannot get LOCAL_PEERID message from soc\n");
-
-		/** convert info to our representation */
-		auth = unptoauth(&unp);
-
-		/** Check all configured auth modules */
-		ret = auth_mod_loop(auth);
-
-		DPRINTF(("Authentication module framework returned %d\n", ret));
-
-		while (1) {
-			if ((msg = malloc(sizeof(msg_t))) == NULL)
-				err(EXIT_FAILURE, "Cannot allocate more memory %s.\n", __func__);
-
-			memset(msg, 0, sizeof(msg_t));
-
-			msg->auth_msg = auth;
+	i = sizeof(struct sockaddr_un);
+	/*!
+	 * Call accept() to accept connection request. This call will block
+	 * until a connection request arrives.
+	 */
+	if ((nsoc = accept(fd, (struct sockaddr *)&addr, &i)) == -1)
+		err(EXIT_FAILURE, "Accept failed %s %s %.4d\n",
+		 __FILE__, __func__, __LINE__);
 			
-			msg->msg_size = recvfrom(nsoc, msg->msg_buf, sizeof(msg->msg_buf), 0, NULL, NULL);
-			if (msg->msg_size == -1)
-				err(EXIT_FAILURE, "Recv call failed %s\n.", __func__);
+	/** Get information about connected peer */
+	if (getsockopt(nsoc, 0, LOCAL_PEEREID, &unp, &unp_size) < 0)
+		err(EXIT_FAILURE, "Cannot get LOCAL_PEERID message from" 
+		"socket %s %s %.4d\n", __FILE__, __func__, __LINE__);
 
-			/** recv_size 0 means EOF from other side. */
-			if (msg->msg_size == 0)
-				break;
-			
-			/** Parse msg_t and create authlogd sd elements save result to msg_t::msg_new. */
-			parse_msg(msg);
+	/** convert info to our representation */
+	auth = unptoauth(&unp);
 
-			/** Send message with auth SD element to syslog. */
-			send(syssoc, msg->msg_new, strlen(msg->msg_new), 0);
-			
-			free(msg);
-		}
-		close(nsoc);
-		free(auth);
+	/** Check all configured auth modules */
+	ret = auth_mod_loop(auth);
+
+	DPRINTF(("Authentication module framework returned %d\n", ret));
+
+	while (1) {
+		if ((msg = malloc(sizeof(msg_t))) == NULL)
+			err(EXIT_FAILURE, "Cannot allocate more memory %s %s %.4d\n",
+			__FILE__, __func__, __LINE__);
+		memset(msg, 0, sizeof(msg_t));
+
+		msg->auth_msg = auth;
+
+		msg->msg_size = recvfrom(nsoc, msg->msg_buf, sizeof(msg->msg_buf), 0, NULL, NULL);
+		if (msg->msg_size == -1)
+			err(EXIT_FAILURE, "Recv call failed %s %s %.4d\n",
+			__FILE__, __func__, __LINE__);
+
+		/** recv_size 0 means EOF from other side. */
+		if (msg->msg_size == 0)
+			break;
+
+		/** Parse msg_t and create authlogd sd elements save result to msg_t::msg_new. */
+		parse_msg(msg);
+
+		/** Send message with auth SD element to syslog. */
+		send(syssoc, msg->msg_new, strlen(msg->msg_new), 0);
+
+		free(msg);
 	}
+	close(nsoc);
+	free(auth);
 		    
-	return 0;
+	return;
 }
 
 static int
@@ -266,16 +311,19 @@ opensyslog(const char *path)
 
 	/** Create socket for authenticated logging */
 	if ((syssoc = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
-		err(EXIT_FAILURE, "%s call failed\n", __func__);
+		err(EXIT_FAILURE, "Error: %s %s %.4d\n",
+		 __FILE__, __func__, __LINE__);
 
 	memset(&addr, 0, sizeof(addr));
 	addr.sun_family = AF_LOCAL;
 	if (strlen(path) >= sizeof(addr.sun_path))
-		err(EXIT_FAILURE, "Path to soc si too long %s\n", path);
+		err(EXIT_FAILURE, "Path to soc si too long %s %s %s %.4d\n",
+		 path, __FILE__, __func__, __LINE__);
 
 	strncpy(addr.sun_path, path, sizeof(addr.sun_path));
 	if ((ret = connect(syssoc, (const struct sockaddr *)&addr, SUN_LEN(&addr))) != 0)
-		err(EXIT_FAILURE, "Cannot bind to auth log soc %s\n", path);
+		err(EXIT_FAILURE, "Cannot bind to auth log soc %s %s %s %.4d\n",
+		path, __FILE__, __func__, __LINE__);
 
 	return syssoc;
 }
@@ -295,7 +343,8 @@ openauthlog(const char *path)
 
 	/** Create socket for authenticated logging */
 	if ((soc = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
-		err(EXIT_FAILURE, "%s call failed\n", __func__);
+		err(EXIT_FAILURE, "Error: %s %s %.4d\n",
+		 __FILE__, __func__, __LINE__);
 
 //	if (setsockopt(soc, SOL_SOCKET, LOCAL_CREDS, &on, sizeof(on)) < 0)
 //		err(EXIT_FAILURE, "Cannot set LOCAL_CREDS flag on %s soc\n", path);
@@ -303,11 +352,13 @@ openauthlog(const char *path)
 	memset(&addr, 0, sizeof(addr));
 	addr.sun_family = AF_LOCAL;
 	if (strlen(path) >= sizeof(addr.sun_path))
-		err(EXIT_FAILURE, "Path to soc si too long %s\n", path);
+		err(EXIT_FAILURE, "Path to soc si too long %s %s %s %.4d\n",
+		 path, __FILE__, __func__, __LINE__);
 
 	strncpy(addr.sun_path, path, sizeof(addr.sun_path));
 	if ((ret = bind(soc, (const struct sockaddr *)&addr, SUN_LEN(&addr))) != 0)
-		err(EXIT_FAILURE, "Cannot bind to auth log soc %s\n", path);
+		err(EXIT_FAILURE, "Cannot bind to auth log soc %s %s %s %.4d\n",
+		 path, __FILE__, __func__, __LINE__);
 
 	return soc;
 }
@@ -332,7 +383,8 @@ unptoauth(struct unpcbid *unp)
 	size_t len;
 	
 	if ((auth = malloc(sizeof(auth_msg_t))) == NULL)
-		err(EXIT_FAILURE, "Cannot Allocate memory %s\n", __func__);
+		err(EXIT_FAILURE, "Cannot Allocate memory %s %s %.4d\n",
+		 __FILE__, __func__, __LINE__);
 
 	/** This requires proc filesystem mounted in linux compatible option */
 	snprintf(path, MAXPATHLEN, "/proc/%d/exe", unp->unp_pid);
@@ -353,6 +405,37 @@ unptoauth(struct unpcbid *unp)
 	DPRINTF(("Application path %s\n", proc_path));
 	
 	return auth;
+}
+
+/*!
+ * Prepare authlogd to exit correctly, close all 
+ * opened sockets, flush output and do all needed 
+ * stuff. Called from singal handlers set in main()
+ * with EV_ADD.
+ * @param fd Descriptor where we have received event
+ * @param event type of event
+ * @param ev 
+ */
+void
+die(int fd, short event, void *ev)
+{
+	exit(0);
+}
+
+/*!
+ * Allocate event structure for later usage.
+ */
+struct event *
+allocev(void)
+{
+	struct event *ev;
+
+	if ((ev = malloc(sizeof(struct event))) == NULL)
+		err(EXIT_FAILURE, "Cannot allocate memory %s\n", __func__);
+	
+	memset(ev, 0, sizeof(struct event));	
+		
+	return ev;
 }
 
 static void 
