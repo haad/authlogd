@@ -107,10 +107,7 @@ verify_config_sign(prop_dictionary_t config, prop_dictionary_t sign)
 	conf = prop_dictionary_externalize(config);
 	
 	prop_dictionary_get_cstring_nocopy(sign, CF_SIGN_BLOCK, &signb);
-	
-	authlogd_ssl_init();
-	authlogd_sign_init();
-	
+		
 	authlogd_verify_buf(conf, strlen(conf), signb, strlen(signb));
 	
 	return 0;

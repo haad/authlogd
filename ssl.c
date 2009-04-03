@@ -34,6 +34,7 @@ static EVP_PKEY     *eprivkey;
 static EVP_PKEY     *epubkey;
 static X509         *xcert;
 
+
 /*!
  * Initialize signing module.
  */
@@ -78,6 +79,18 @@ authlogd_sign_init(void)
 
 		sign_method = EVP_dss1();
 	}
+}
+
+/*!
+ * Initialize verify module.
+ */
+void
+authlogd_verify_init(void)
+{
+	verify_global_conf =  EVP_MD_CTX_create();
+	EVP_MD_CTX_init(verify_global_conf);
+	
+	return;
 }
 
 /*!

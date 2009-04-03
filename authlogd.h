@@ -129,6 +129,7 @@ void parse_msg(msg_t *);
 /* ssl.c */
 void authlogd_ssl_init(void);
 void authlogd_sign_init(void);
+void authlogd_verify_init(void);
 char * authlogd_sign_buf(const char *, size_t);
 int authlogd_verify_buf(const char *, size_t, const char *, size_t);
 

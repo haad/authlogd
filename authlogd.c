@@ -178,6 +178,11 @@ main(int argc, char **argv)
 
 	if (!flg_cert)
 	  return EXIT_FAILURE;
+	
+	/** Initialize ssl subsystem */
+	authlogd_ssl_init();
+	authlogd_sign_init();
+	authlogd_verify_init();
 
 	/** Initialize precompiled authentication modules. */
 	auth_mod_init();
