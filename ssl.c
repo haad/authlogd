@@ -123,6 +123,7 @@ authlogd_sign_buf(const char *buff, size_t len)
  * @param config_len buffer len
  * @param sign buffer with signature
  * @param sign_len buffer signature len
+ * @return 1 valid checksum 0 invalid.
  */
 int
 authlogd_verify_buf(const char *config, size_t config_len, 
@@ -131,9 +132,7 @@ authlogd_verify_buf(const char *config, size_t config_len,
 	
 	EVP_VerifyInit(verify_global_conf, sign_method);
 	EVP_VerifyUpdate(verify_global_conf, config, config_len);
-	EVP_VerifyFinal(verify_global_conf, sign, sign_len, epubkey);
-
-	return 0;
+	return EVP_VerifyFinal(verify_global_conf, sign, sign_len, epubkey);
 }
 
 /*!
