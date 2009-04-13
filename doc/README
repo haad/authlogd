@@ -5,7 +5,21 @@ Server startup
 
 ./authlogd -c doc/authlogd_app.xml -p doc/dsapubkey.pem -P doc/dsaprivkey.pem -C doc/dsacert.pem
 
+Run tests 
+
+make && atf-run | atf-report
+
 		OpenSSL Howto
+
+Key Generation 
+
+1)openssl dsaparam -noout -out dsakey.pem -genkey 1024
+2)openssl req -new -x509 -key dsakey.pem -out dsacert.pem -days 1095
+3)openssl dsa -in dsakey.pem -pubout -out dsapubkey.pem
+
+http://madboa.com/geek/openssl/#key-dsa
+http://www.openssl.org/docs/HOWTO/certificates.txt
+
 
 Signature Generation 
 
