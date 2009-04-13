@@ -1,4 +1,10 @@
 
+		README
+
+Server startup
+
+./authlogd -c doc/authlogd_app.xml -p doc/dsapubkey.pem -P doc/dsaprivkey.pem -C doc/dsacert.pem
+
 		OpenSSL Howto
 
 Signature Generation 

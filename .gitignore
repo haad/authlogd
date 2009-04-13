@@ -6,5 +6,6 @@ obj
 .gdbinit
 .#*.*
 *~
+._*
 authlogd
 #*#

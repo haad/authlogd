@@ -270,9 +270,13 @@ dolog(int fd, short event, void *ev)
 
 		/** Parse msg_t and create authlogd sd elements save result to msg_t::msg_new. */
 		parse_msg(msg);
-
-		/** Send message with auth SD element to syslog. */
-		send(syssoc, msg->msg_new, strlen(msg->msg_new), 0);
+		
+		DPRINTF(("Sending message to syslog\n"));
+		if (flg_debug)
+			fprintf(stderr, "%s\n", msg->msg_new);
+		else
+			/** Send message with auth SD element to syslog. */
+			send(syssoc, msg->msg_new, strlen(msg->msg_new), 0);
 
 		free(msg);
 	}

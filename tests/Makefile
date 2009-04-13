@@ -6,6 +6,7 @@ AUTHLOGDBASE= 	/usr/src/local/devel/authlogd
 
 TESTSDIR=	${AUTHLOGDBASE}/tests
 
-TESTS_C=	t_authlog
+TESTS_C=		t_authlogd_msg
+TESTS_SH=       t_authlogd_auth
 
 .include <bsd.test.mk>
