@@ -90,15 +90,11 @@ find_sd(msg_t *msg)
 		
 		if (*str == ' ') {
 			space++;
-//			printf("Found space in a message number is %d\n", space);
 		} else
 			continue;
 
 		if (space == 6) {
-//			printf("Found sd element part of message\n");
 			str++;
-
-//			printf("|%c|++|%s|\n", *str, str);
 
 			/** There are no SD elements in message */
 			if (*str == '-') {
@@ -116,10 +112,6 @@ find_sd(msg_t *msg)
 				str--;
 				*str = '\0';
 			}
-			
-//			printf("msg->msg_header |%s|\n", msg->msg_header);
-//			printf("msg->msg_body |%s|\n", msg->msg_body);
-			
 			break;
 		}
 	}

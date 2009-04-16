@@ -378,8 +378,10 @@ unptoauth(struct unpcbid *unp)
 	/** This requires proc filesystem mounted in linux compatible option */
 	snprintf(path, MAXPATHLEN, "/proc/%d/exe", unp->unp_pid);
 
-	if((len = readlink(path, proc_path, sizeof(proc_path) - 1)) == -1)
-		warn("Cannot read proc link\n");
+	if((len = readlink(path, proc_path, sizeof(proc_path) - 1)) == -1) {
+		free(auth);
+		return NULL;
+	}
 
 	proc_path[len] = '\0';
 	strncpy(auth->msg_path, proc_path, len);

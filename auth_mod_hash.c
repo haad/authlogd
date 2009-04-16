@@ -184,10 +184,10 @@ auth_mod_hash_auth(auth_msg_t *auth_msg, void *config)
 	ret = AUTH_MODULE_DENY;
 	
 	if ((app = search_app(auth_msg->msg_path)) == NULL)
-		return AUTH_MODULE_UNKNOW;
+		return AUTH_MODULE_UNKNOWN;
 
 	if ((hash = conf->mod_hash->filefunc(auth_msg->msg_path, NULL)) == NULL)
-		return AUTH_MODULE_UNKNOW;
+		return AUTH_MODULE_UNKNOWN;
 
 	if (strncasecmp(app->app_hash, hash, strlen(app->app_hash)) == 0)
 		ret = AUTH_MODULE_ALLOW;

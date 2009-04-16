@@ -81,9 +81,9 @@ typedef struct msg {
 	auth_msg_t *auth_msg;
 } msg_t;
 
-#define AUTH_MODULE_DENY   0
-#define AUTH_MODULE_ALLOW  1
-#define AUTH_MODULE_UNKNOW 2
+#define AUTH_MODULE_DENY 	0
+#define AUTH_MODULE_ALLOW 	1
+#define AUTH_MODULE_UNKNOWN 	2
 
 #define MAX_NAME_LEN 32
 /* Structure defining authentication module */
