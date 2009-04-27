@@ -40,6 +40,7 @@
 #include <err.h>
 #include <errno.h>
 #include <event.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,6 +52,7 @@ static struct event * allocev(void);
 static void dolog(int, short, void *);
 static int openauthlog(const char *);
 static int opensyslog(const char *);
+static int check_procfs(void);
 static auth_msg_t * unptoauth(struct unpcbid *);
 static char * find_msg(char *, size_t, size_t *);
 static void usage(void);
@@ -179,6 +181,9 @@ main(int argc, char **argv)
 
 	if (!flg_cert)
 	  return EXIT_FAILURE;
+	
+	if (check_procfs() != 0)
+		return EXIT_FAILURE;
 	
 	/** Initialize ssl subsystem */
 	authlogd_ssl_init();
@@ -471,11 +476,36 @@ allocev(void)
 	return ev;
 }
 
+/*!
+ * Check if system has mounted proc filesystem.
+ */
+static int
+check_procfs(void)
+{
+	int cpuinfo;
+	DPRINTF(("Checking for mounted proc file system in /proc\n"));
+	
+	if ((cpuinfo = open("/proc/cpuinfo", O_RDONLY, 0)) == -1) {
+		warn("Authlogd needs mounted procfs with linux emulation.\n");
+		return ENOENT;
+	}
+	
+	close(cpuinfo);
+	
+	return 0;
+}
+
 static void 
 usage(void)
 {
 
   printf("Authlogd daemon accept these switches\n");
-
+  printf("authlogd [hDd] [c:C:P:p:S:]\n");
+  printf("\t-h print this help\n" 
+	 "\t-C public key certificate\n" "\t-c proplib based config file \n" 
+	 "\t-p public key file \n" "\t-P privat key file \n" 
+	 "\t-D enable debug output\n" "\t-d dump config file for digital signing\n" 
+	 "\t-S path to syslog socket defautl(/var/run/log) \n");
+	
   exit(EXIT_FAILURE);
 }
