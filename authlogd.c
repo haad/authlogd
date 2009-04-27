@@ -52,6 +52,7 @@ static void dolog(int, short, void *);
 static int openauthlog(const char *);
 static int opensyslog(const char *);
 static auth_msg_t * unptoauth(struct unpcbid *);
+static char * find_msg(char *, size_t, size_t *);
 static void usage(void);
 
 /*! 
@@ -88,6 +89,7 @@ main(int argc, char **argv)
 	prop_dictionary_t conf_buf;
 	struct event *ev;
 
+	conf_buf = NULL;
 	syslog_path = SYSLOG_PATH;
 	len = 0;
 	flg_dump = 0;
@@ -225,9 +227,17 @@ dolog(int fd, short event, void *ev)
 	struct unpcbid unp;
 	auth_msg_t *auth;
 	msg_t *msg;
-	int unp_size = sizeof(unp);
-	int i, ret, recv_size;
-	int nsoc;
+	socklen_t i, unp_size = sizeof(unp);
+	ssize_t msg_size;		/** length of received stream */
+	size_t idx;
+	
+	int ret, nsoc;
+	char buf[AUTHLOG_MESSAGE_LEN];	/** buffer for receiving message */
+	char *msg_p;
+	
+	idx = 0;
+	msg_p = NULL;
+	msg_size = 0;
 		
 	i = sizeof(struct sockaddr_un);
 	/*!
@@ -243,7 +253,7 @@ dolog(int fd, short event, void *ev)
 		err(EXIT_FAILURE, "Cannot get LOCAL_PEERID message from" 
 		"socket %s %s %.4d\n", __FILE__, __func__, __LINE__);
 
-	/** convert info to our representation */
+	/** Convert info to our representation */
 	auth = unptoauth(&unp);
 
 	/** Check all configured auth modules */
@@ -251,47 +261,95 @@ dolog(int fd, short event, void *ev)
 
 	DPRINTF(("Authentication module framework returned %d\n", ret));
 
+	if ((msg = malloc(sizeof(msg_t))) == NULL)
+		err(EXIT_FAILURE, "Cannot allocate more memory %s %s %.4d\n",
+		__FILE__, __func__, __LINE__);
+	memset(msg, 0, sizeof(msg_t));
+
+	msg->auth_msg = auth;
+	msg->msg_auth_status = ret;
+	
 	while (1) {
-		if ((msg = malloc(sizeof(msg_t))) == NULL)
-			err(EXIT_FAILURE, "Cannot allocate more memory %s %s %.4d\n",
-			__FILE__, __func__, __LINE__);
 		memset(msg, 0, sizeof(msg_t));
-
-		msg->auth_msg = auth;
-
-		msg->msg_size = recvfrom(nsoc, msg->msg_buf, sizeof(msg->msg_buf), 0, NULL, NULL);
-		if (msg->msg_size == -1)
+		idx = 0;
+		
+		msg_size = recv(nsoc, buf, (sizeof(buf) - 1), 0);
+		if (msg_size == -1)
 			err(EXIT_FAILURE, "Recv call failed %s %s %.4d\n",
 			__FILE__, __func__, __LINE__);
-
-		/** recv_size 0 means EOF from other side. */
-		if (msg->msg_size == 0)
-			break;
-
-		/** Parse msg_t and create authlogd sd elements save result to msg_t::msg_new. */
-		parse_msg(msg);
 		
-		DPRINTF(("Sending message to syslog\n"));
-		if (flg_debug)
-			fprintf(stderr, "%s\n", msg->msg_new);
-		else
-			/** Send message with auth SD element to syslog. */
-			send(syssoc, msg->msg_new, strlen(msg->msg_new), 0);
+		/** recv_size 0 means EOF from other side. */
+		if (msg_size == 0)
+			break;
+		
+		/** Set last character in receiving buffer to \0 for extra insurance */	
+		buf[AUTHLOG_MESSAGE_LEN - 1] = '\0';
+			
+		DPRINTF(("Received %d bytes long buffer.\n", msg_size));	
+		
+		while ((msg_p = find_msg(buf, msg_size, &idx)) != NULL) {
+			msg->msg_size = strlen(msg_p);
+			
+			strncpy(msg->msg_buf, msg_p, msg->msg_size);
+			
+			/** Parse msg_t and create authlogd sd elements save result to msg_t::msg_new. */
+			parse_msg(msg);
 
-		free(msg);
+			DPRINTF(("Sending message to syslog\n"));
+			if (flg_debug)
+				fprintf(stderr, "%s\n", msg->msg_new);
+			else
+				/** Send message with auth SD element to syslog. */
+				send(syssoc, msg->msg_new, strlen(msg->msg_new), 0);
+		}
 	}
+	
+	free(msg);
 	close(nsoc);
 	free(auth);
 		    
 	return;
 }
 
+/*!
+ * Find message in suplied buffer there can be more than one message there
+ * SOCK_STREAM can put more than one message in to buffer. Messages are cut
+ * with '\0'.
+ * @param[in] msg  buffer where recv placed data
+ * @param[in] msg_size size of msg buffer
+ * @param[out] idx last idx in msg
+ * @return pointer to msg buffer where message after idx len starts
+ */
+static char *
+find_msg(char *msg, size_t msg_size, size_t *idx) 
+{
+	char *msg_p;
+	
+	DPRINTF(("%s: idx = %zu\n", __func__, *idx));
+	if (msg == NULL)
+		return NULL;
+	
+	if (*idx == msg_size)
+		return NULL;
+		
+	/** find_msg was called for the first time set idx to 
+	    msg strlen and return msg start */
+	if (*idx == 0) {
+		*idx = strlen(msg) + 1; /** get length of first message */
+		return msg;
+	}
+	
+	msg_p = msg + *idx;
+
+	*idx += strlen(msg + *idx) + 1; 
+	
+	return msg_p;
+}
+
 static int
 opensyslog(const char *path)
 {
 	struct sockaddr_un addr;
-	int on = 1;
-	int syssoc;
 	int ret;
 
 	/** Create socket for authenticated logging */
@@ -322,7 +380,6 @@ static int
 openauthlog(const char *path)
 {
 	struct sockaddr_un addr;
-	int on = 1;
 	int soc;
 	int ret;
 
@@ -369,7 +426,7 @@ unptoauth(struct unpcbid *unp)
 	auth_msg_t *auth;
 	char path[MAXPATHLEN];
 	char proc_path[MAXPATHLEN];
-	size_t len;
+	ssize_t len;
 	
 	if ((auth = malloc(sizeof(auth_msg_t))) == NULL)
 		err(EXIT_FAILURE, "Cannot Allocate memory %s %s %.4d\n",

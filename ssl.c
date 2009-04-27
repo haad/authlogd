@@ -46,7 +46,7 @@ authlogd_sign_init(void)
 	sign_global_conf =  EVP_MD_CTX_create();
 	EVP_MD_CTX_init(sign_global_conf);
 
-	if (ssl = SSL_new(ssl_global_conf)) {
+	if ((ssl = SSL_new(ssl_global_conf))) {
 		DPRINTF(("Try to get keys from TLS X.509 cert...\n"));
 
 		if (!(xcert = SSL_get_certificate(ssl))) {
@@ -102,7 +102,7 @@ authlogd_verify_init(void)
 char *
 authlogd_sign_buf(const char *buff, size_t len)
 {
-	char *buf;
+	u_char *buf;
 	unsigned char sig_b64[65];
 	unsigned sig_len = EVP_PKEY_size(eprivkey);
 	char *signature;
@@ -134,7 +134,7 @@ authlogd_verify_buf(const char *config, size_t config_len,
 	
 	EVP_VerifyInit(verify_global_conf, sign_method);
 	EVP_VerifyUpdate(verify_global_conf, config, config_len);
-	return EVP_VerifyFinal(verify_global_conf, sign, sign_len, epubkey);
+	return EVP_VerifyFinal(verify_global_conf, (const u_char *)sign, sign_len, epubkey);
 }
 
 /*!

@@ -85,26 +85,23 @@ auth_mod_search(const char *auth_mod_name)
  *         AUTH_MODULE_ALLOW.
  */
 int
-auth_mod_loop(auth_msg_t *msg)
+auth_mod_loop(auth_msg_t *auth)
 {
 	auth_mod_t *mod;
 	int ret;
 	
 	ret = AUTH_MODULE_UNKNOWN;
 	
-	if (msg == NULL) {
-		msg->msg_auth_status = ret;
+	if (auth == NULL)
 		return ret;
-	}
 			
 	SLIST_FOREACH(mod, &auth_mod_list, next_mod) {
-		ret = mod->auth(msg, mod->config);
+		ret = mod->auth(auth, mod->config);
 		if ((ret == AUTH_MODULE_DENY) ||
 		    (ret == AUTH_MODULE_UNKNOWN))
 			break;
 	}
-
-	msg->msg_auth_status = ret;
+	
 	return ret;
 }
 

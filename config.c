@@ -58,7 +58,6 @@ parse_config(prop_dictionary_t dict)
 	uint32_t version;
 	prop_dictionary_t config, sign;
 	prop_array_t authmod, app;
-	char *buf;
 
 	if ((config = prop_dictionary_get(dict, CF_CONFIG)) == NULL)
 		err(EXIT_FAILURE, "Config file doesn't have required %s section.\n", CF_CONFIG);
@@ -128,7 +127,6 @@ parse_authmod_sect(prop_array_t authmod_array)
 	prop_dictionary_t authmod_dict, authmod_config_dict;
 	auth_mod_t *auth_mod;
 	const char *name;
-	char *buf;
 
 	iter = prop_array_iterator(authmod_array);
 	
@@ -163,7 +161,6 @@ parse_app_sect(prop_array_t app_array)
 	prop_object_t obj;
 	auth_mod_t *auth_mod;
 	const char *path;
-	const char *buf;
 	const char *name;
 	
 	iter = prop_array_iterator(app_array);

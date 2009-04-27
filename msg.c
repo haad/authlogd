@@ -41,11 +41,14 @@ static void
 get_auth_sd(msg_t *msg)
 {
 	char *sign = '\0';
-	char *status;
+	const char *status;
+	
+	status = NULL;
+	
 #define AUTHORIZE   "Authorized"
 #define DENY        "Denied"
 #define UNKNOWN     "Unknown"	
-	switch (msg->auth_msg->msg_auth_status) {
+	switch (msg->msg_auth_status) {
 	case 0:
 		status = DENY;
 		break;
@@ -81,7 +84,6 @@ find_sd(msg_t *msg)
 {
 	int space;
 	char *str;
-	int i;
 
 	str = msg->msg_buf;
 	space = 0;

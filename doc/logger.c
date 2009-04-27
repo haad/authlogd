@@ -18,11 +18,14 @@
 
 char buf1[] = "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8";
 char buf2[] = "<165>1 2003-10-11T22:14:15.003Z mymachine.example.com evntslog - ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"] BOMAn application event log entry";
+char buf3[] = "<35>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8";
+char buf4[] = "<166>1 2003-10-11T22:14:15.003Z mymachine.example.com evntslog - ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"] BOMAn application event log entry";
 
 int
 main(int argc, char *argv[])
 {
 	int s;
+	ssize_t size;
 	struct sockaddr_un sa;
 		
 	/*
@@ -51,10 +54,35 @@ main(int argc, char *argv[])
 
 	printf("My creds are gid: %d, uid: %d, pid: %d\n", getegid(), geteuid(), getpid());
 
-	send(s, buf1, sizeof(buf1), 0);
-
-	send(s, buf2, sizeof(buf2), 0);
+	if ((size = send(s, buf1, sizeof(buf1), 0)) == -1)
+		perror("send failed\n");
 	
+	printf("size = %d\n", size);
+	
+	if ((size = send(s, buf4, sizeof(buf4), 0)) == -1)
+		perror("send failed\n");
+	
+	printf("size = %d\n", size);
+
+	if ((size = send(s, buf3, sizeof(buf3), 0)) == -1)
+		perror("send failed\n");
+
+	printf("size = %d\n", size);
+	
+	if ((size = send(s, buf2, sizeof(buf2), 0)) == -1)
+		perror("send failed\n");
+	
+	printf("size = %d\n", size);
+
+	if ((size = send(s, buf1, sizeof(buf1), 0)) == -1)
+		perror("send failed\n");
+
+	printf("size = %d\n", size);
+
+	if ((size = send(s, buf4, sizeof(buf4), 0)) == -1)
+		perror("send failed\n");
+
+	printf("size = %d\n", size);
 	
 	close(s);
 	

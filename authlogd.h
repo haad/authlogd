@@ -61,6 +61,7 @@
 #define AUTHLOG_VERSION 1
 
 #define AUTHLOG_MESSAGE_LEN 4096
+
 #define AUTHLOG_AUTH_SD 512
 
 typedef struct auth_msg {
@@ -68,16 +69,16 @@ typedef struct auth_msg {
 	uid_t   msg_euid;             /** Effective user id */
 	gid_t   msg_egid;             /** Effective group id */
 	pid_t   msg_pid;              /** Process id */
-	int     msg_auth_status;      /** Status of message after auth process */
 } auth_msg_t;
 
 typedef struct msg {
-	size_t msg_size;
+	ssize_t msg_size;
 	char msg_buf[AUTHLOG_MESSAGE_LEN];
 	char msg_new[AUTHLOG_MESSAGE_LEN];
 	char msg_auth_sd[AUTHLOG_AUTH_SD];
 	char *msg_header;
 	char *msg_body;
+	int  msg_auth_status;      /** Status of message after auth process */
 	auth_msg_t *auth_msg;
 } msg_t;
 

@@ -27,7 +27,7 @@ static hash_t hashes[] = {
 	{ "SHA256", SHA256_File, SHA256_DIGEST_STRING_LENGTH },
 	{ "SHA384", SHA384_File, SHA384_DIGEST_STRING_LENGTH },
 	{ "SHA512", SHA512_File, SHA512_DIGEST_STRING_LENGTH },
-	{ NULL, NULL },
+	{ NULL, NULL, 0 },
 };
 
 static TAILQ_HEAD(app_head, hash_app_entry) hash_apps_list;
@@ -116,7 +116,6 @@ auth_mod_hash_conf(prop_object_t conf_obj, const char *path, void *config)
 {
 	hash_app_entry_t *app;
 	mod_hash_conf_t *conf;
-	gid_t gid;
 
 	assert(config != NULL);
 	
