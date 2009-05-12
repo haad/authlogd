@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
+<plist version="1.0">
+<![CDATA[
+<dict>
+   <!-- Config dictionary entry is guarded by sign, hash will be generated from 
+	externalized version of config dictionary.-->
+   <key>config</key>
+   <dict>
+     <key>conf_version</key> <!--File version-->
+     <integer>1</integer>
+     <!----------------------------------------> 
+     <key>authmod</key> <!--List of used auth modules application must support all of them-->
+     <array>
+       <dict><!--Hash_path authentication module configuration-->
+	 <!--Application hash from configuration file must be equal to hash generated from /proc/$pid/exe-->
+	 <key>authmod_name</key>
+	 <string>auth_hash</string>
+	 <key>authmod_config</key>
+	 <dict> <!--This is auth module config part, it is module independent-->
+	   <key>hash_type</key> <!--Digital hash type supported types sha1, sha2.-->
+	   <string>sha1</string>
+	 </dict>
+       </dict>
+       <dict>
+	 <!--App egid must be equal to gid from group_id-->
+	 <key>authmod_name</key>
+	 <string>auth_gid</string>
+	 <key>authmod_config</key>
+	 <dict>
+	   <key>group_id</key>
+	   <integer>1523</integer>  <!--Default egid number-->
+	 </dict>
+       </dict>
+     </array>
+     <!---------------------------------------->    
+     <key>app</key> <!--Array of application entries-->
+     <array>
+       <dict>
+	 <key>app_path</key> <!--Path to application-->
+	 <string>/usr/sbin/ntpd</string>
+	 <key>appmod_config</key>
+	 <array>
+	   <dict>
+	     <key>auth_mod</key>
+	     <string>auth_hash</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <string>6d233d8fcea4a329f340ab7b0c4836823bccb994</string> <!--Digital hash generated with $hash_type algorithm-->
+	   </dict>
+	   <dict>
+	     <key>auth_mod</key>	     
+	     <string>auth_gid</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <integer>1682</integer> <!--Auth group id for this app-->
+	   </dict>
+	 </array>
+       </dict>
+       <dict>
+	 <key>app_path</key> <!--Path to application-->
+	 <string>/usr/sbin/sshd</string>
+	 <key>appmod_config</key>
+	 <array>
+	   <dict>
+	     <key>auth_mod</key>
+	     <string>auth_hash</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <string>268aea7afdb99c39332184fa5fa5affa5f5cc60e</string> <!--Digital hash generated with $hash_type algorithm-->
+	   </dict>
+	   <dict>
+	     <key>auth_mod</key>	     
+	     <string>auth_gid</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <integer>1682</integer> <!--Auth group id for this app-->
+	   </dict>
+	 </array>
+       </dict>
+       <dict>
+	 <key>app_path</key> <!--Path to application-->
+	 <string>/usr/src/local/devel/authlogd/doc/logger</string>
+	 <key>appmod_config</key>
+	 <array>
+	   <dict>
+	     <key>auth_mod</key>
+	     <string>auth_hash</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <string>4300610526c12bac0c006d7b44d89b50913f2bda</string> <!--Digital hash generated with $hash_type algorithm-->
+	   </dict>
+	   <dict>
+	     <key>auth_mod</key>
+	     <string>auth_gid</string> <!--Auth module name-->
+	     <key>auth_mod_data</key>
+	     <integer>100</integer> <!--Auth group id for this app-->
+	   </dict>
+	 </array>
+       </dict>
+     </array>
+  </dict>
+   <!----------------------------------------> 
+   <key>sign</key> <!--Crypto sign block guarding configuration part of file-->
+   <dict>
+     <key>sign_block</key>
+     <string>302d021500a65a81f5e522c30a9c67ba26d68a3c5d8f3815f002145ee08486417e270b40e978218b95f7db062d9108</string> <!--base64 encoded sign for config dictionary -->
+     <key>sign_cert</key>
+     <string></string> <!--base64 encoded certificate which was used to sign config dictionary -->
+   </dict>
+</dict>]]>
+</plist>

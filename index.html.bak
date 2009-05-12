@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>
+			haad/authlogd @ GitHub
+		</title>
+		<style type="text/css">
+/*<![CDATA[*/
+		body {
+		margin-top: 1.0em;
+		background-color: #70ae56;
+		  font-family: "helvetica"; 
+		color: #ffffff;
+		}
+		#container {
+		margin: 0 auto;
+		width: 700px;
+		}
+		h1 { font-size: 3.8em; color: #8f51a9; margin-bottom: 3px; }
+		h1 .small { font-size: 0.4em; }
+		h1 a { text-decoration: none }
+		h2 { font-size: 1.5em; color: #8f51a9; }
+		h3 { text-align: center; color: #8f51a9; }
+		a { color: #8f51a9; }
+		.description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
+		.download { float: right; }
+		pre { background: #000; color: #fff; padding: 15px;}
+		hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
+		.footer { text-align:center; padding-top:30px; font-style: italic; }
+		/*]]>*/
+		</style>
+	</head>
+	<body>
+		<p>
+			<a href="http://github.com/haad/authlogd"><img style="position: absolute; top: 0; right: 0; border: 0;" src="img/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+		</p>
+		<div id="container">
+			<div class="download">
+				<a href="http://github.com/haad/authlogd/zipball/master"><img border="0" width="90" src="img/zip.png" /></a> <a href="http://github.com/haad/authlogd/tarball/master"><img border="0" width="90" src="img/tar.png" /></a>
+			</div>
+			<h1>
+				<a href="http://github.com/haad/authlogd">authlogd</a> <span class="small">by <a href="http://github.com/haad">haad</a></span>
+			</h1>
+			<div class="description">
+				<h2>Authentication Loging daemon.</h2>
+				<p>
+					Authlogd is a server which authenticates syslog messages logged through the socket on which server is listening. 
+					Authlogd keep list of authenticated loggers in a configuration file and verify every message sender against this list.
+				</p>
+				<img border="0" width="480" src="img/authlogd.png" />
+				<p>
+					Authentication is done by adding one SD element with local defined SD element ID, 
+					auth message and DSA made to protect whole auth SD element.
+				</p>
+				<img border="0" width="480" src="img/authlogd_flow.png" />
+				<hr />
+			</div>
+			<h2>Dependencies</h2>
+			<p>
+				Authlogd requires some libc patches(or you need to set up you application to log though 
+				different socket than /var/run/log), openssl an libevent libraries. Daemon requires proc filesystem 
+				mounted in /proc directory in a Linux compatible mode.
+			</p>
+			<h2>User Documentation</h2>
+			<h3>Config file</h3>
+			<p></p>
+
+
+
+
+			<h2>License</h2>
+			<p>
+				2 clause BSD license
+			</p>
+			<h2>Authors</h2>
+			<p>
+				haad (haad@fiit.stuba.sk)<br/>
+				Adam Hamsik (haad@netbsd.org)<br/>
+				<br />
+			</p>
+			<h2>Contact</h2>
+			<p>
+				haad@fiit.stuba.sk or haad@netbsd.org<br/>
+			</p>
+			<h2>Download</h2>
+			<p>
+				You can download this project in either <a href="http://github.com/haad/authlogd/zipball/master">zip</a> or <a href="http://github.com/haad/authlogd/tarball/master">tar</a> formats.
+			</p>
+			<p>
+				You can also clone the project with <a href="http://git-scm.com">Git</a> by running:
+			</p>
+			<pre>
+$ git clone git://github.com/haad/authlogd
+</pre>
+			<div class="footer">
+				get the source code on GitHub : <a href="http://github.com/haad/authlogd">haad/authlogd</a>
+			</div>
+		</div>
+	</body>
+</html>
